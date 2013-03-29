@@ -34,9 +34,6 @@ if [ -z "$COMANDO" ] ; then
 	echo " kill	Mata a todo VLC viviente"
 	echo " run	Ejecuta el VLC"
 	echo " restart	Mata a todo VLC viviente y vuelve a ejecutarlo"
-	echo " random	Activa el modo random"
-	echo " no-random	Desactiva el modo random"
-	echo " randomize	Randomiza la lista"
 	exit 1
 fi
 
@@ -212,23 +209,6 @@ case $COMANDO in
 	restart)
 		$0 kill
 		$0 run
-	;;
-	random)
-		echo -ne "Activating random..."
-		wget --quiet -O /dev/stdout "$URL_STATUS" | grep -qs "<random>0</random>"
-		if [ $? -eq 0 ] ; then $WGETCMD "$URL_STATUS?command=pl_random" ; fi
-                showok $?
-	;;
-	no-random)
-                echo -ne "Deactivating random..."
-                wget --quiet -O /dev/stdout "$URL_STATUS" | grep -qs "<random>1</random>"
-                if [ $? -eq 0 ] ; then $WGETCMD "$URL_STATUS?command=pl_random" ; fi
-                showok $?
-        ;;
-	randomize)
-		echo -ne "Randomizing..."
-                if [ $? -eq 0 ] ; then $WGETCMD "$URL_STATUS"'?command=pl_sort&id=1&val=5' ; fi
-                showok $?
 	;;
 	
 esac
