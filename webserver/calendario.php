@@ -301,7 +301,7 @@ if($opciones["ahora"]==true){
         // Conectamos a la playlist del VLC para ver la canción actual
         if($runningShow!=null) $now=$runningShow;
         else{
-                $xml = @file_get_contents('http://$VLC_SERVER:$VLC_PORT/requests/status.xml');
+                $xml = @file_get_contents("http://{$VLC_SERVER}:{$VLC_PORT}/requests/status.xml");
                 if($xml){
                         preg_match('/^<info name=\'title\'>([^<]*)<\/info>.*/',strstr($xml,'<info name=\'title'),$title);
                         preg_match('/.*<info name=\'artist\'>([^<]*)<\/info>.*/',strstr($xml,'<info name=\'artist'),$artist);
@@ -314,7 +314,7 @@ if($opciones["ahora"]==true){
 		        // Buscamos carátula en el servidor
                         $local_url = $_SERVER['DOCUMENT_ROOT'].'/images/musica/'. html_entity_decode($artist[1].' - '.$title[1],ENT_QUOTES).'.jpg';
                         if(file_exists($local_url)){
-                                $now['icono'] = 'http://www.radiobattletoads.com/images/musica/'.rawurlencode(html_entity_decode($artist[1].' - '.$title[1],ENT_QUOTES)).'.jpg';
+                                $now['icono'] = 'http://'.$WEB_SERVER.'/images/musica/'.rawurlencode(html_entity_decode($artist[1].' - '.$title[1],ENT_QUOTES)).'.jpg';
                         }
                         else{
 			        // Si no hay la buscamos en la caché del VLC del servidor del directo y la copiamos a este servidor
@@ -325,7 +325,7 @@ if($opciones["ahora"]==true){
 				        $imagen = @file_get_contents($art_url);
 				        if($imagen!=FALSE){
 				                file_put_contents("../images/musica/{$artist[1]} - {$title[1]}.jpg",$imagen);
-				                $now['icono'] = 'http://www.radiobattletoads.com/images/musica/'.rawurlencode(html_entity_decode($artist[1].' - '.$title[1],ENT_QUOTES)).'.jpg';
+				                $now['icono'] = 'http://'.$WEB_SERVER.'/images/musica/'.rawurlencode(html_entity_decode($artist[1].' - '.$title[1],ENT_QUOTES)).'.jpg';
 			                }
 			                else{
 			                        // Y si no hay ponemos un icono por defecto

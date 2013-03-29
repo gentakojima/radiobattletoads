@@ -19,6 +19,9 @@ $DIFERIDOS_URL="http://radio.example.com/diferidos";
 $VLC_SERVER="radio.example.com";
 $VLC_PORT="16223";
 
+/* Web server location */
+$WEB_SERVER="webserver.example.com"
+
 /* Icecast server location for getting statistics. Not required for calendario.php,
  * though */
 $ICECAST2_SERVER="radio.example.com";
