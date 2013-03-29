@@ -13,14 +13,34 @@ That being clarified, there we go:
 This is the code running the online radio Radio Battletoads
 (http://www.radiobattletoads.com). It's main features are:
 
-  * Read the schedule from Google Calendar and setup everything automatically
-  * Supports live streams on mp3 and ogg
-  * Supports non-live streams by taking: wether a mp3 URL, or the last episode
-    of a podcast RSS
-  * Streams random music while there's nothing to stream
-  * Supports jingles shuffled with the music
-  * Supports simple curtains to indicate the start or ending of a program.
-  * Streams everything on ogg vorbis (yay!)
+  * Reading the radio schedule from Google Caledar XMLs
+  * Date/time restrictions to a calendar to avoid clashes between different
+    programs
+  * Streams live shows by providing a streaming URL, or recorded shows by 
+    providing a mp3 URL or the podcast RSS URL
+  * Streams random music when there's no show scheduled
+  * Shuffles jingles with the music played when there's no show scheduled
+  * Uses curtains to indicate the start or ending of a program
+  * Streams everything on ogg vorbis
+
+
+== KNOWN ISSUES AND LIMITATIONS ==
+
+  * Actions can only be taken only once in a minute, and the scheduler takes
+    several seconds to run, so every scheduled show might start between 1
+    and 2 minutes later. This is important for live shows.
+  * The generated calendar is cached, so changes to a Googler Calendar won't be
+    instantly reflected on the generated calendar (takes up to 3.5 minutes by 
+    default for changes to take effect)
+  * Podcasts are downloaded every day just once by default. If a podcast is
+    published between the last night and the scheduled hour, the previous 
+    episode will be aired instead
+  * MP3s are downloaded every hour. If a mp3 is scheduled less than an hour
+    before the show starts, the show might not be aired
+  * If something interrupts a recorded show (a server restart, a manual VLC
+    kill or whatever), once the radio is up and running again, the show will
+    be aired again from the start, and will be cut anyways at the original
+    end time [There are plans to fix this some day]
 
 
 == ARCHITECTURE ==
@@ -32,7 +52,7 @@ The main architecture of the radio consists of:
    optional http server to provide additional information to the WEB SERVER)
 
 
-== LANGUAGES ==
+== PROGRAMMING LANGUAGES ==
 
 The STREAMING SERVER part is completely written in BASH. The WEB SERVER part is
 completly written in PHP. NO reason for that.
@@ -45,7 +65,7 @@ The WEB SERVER needs:
 
 The STREAMING SERVER needs:
   * Debian compatible GNU/Linux OS, VLC 2.0, Icecast 2.3, Ttytter 2.0, Podget, 
-    wget, curl, lame, libogg, libvorbis.
+    wget, curl, lame, libogg, libvorbis, GNU Screen.
 
 
 == INSTALLATION ==
@@ -76,6 +96,8 @@ Install VLC. No further steps required for VLC to work.
 
 OPTIONAL: If you want the web server to get the music artwork automatically, 
 you must also install lighttpd and serve the ".cache/vlc/art" directory.
+
+Install GNU Screen.
 
 Install ttytter and setup an account. The radio user should be able to tweet
 by issuing the command "ttytter -status='Something else'".
