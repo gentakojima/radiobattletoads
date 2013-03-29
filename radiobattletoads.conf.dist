@@ -1,0 +1,74 @@
+# Radio Battletoads configuration file
+# Read the README file to understand the radio architecture first
+# You'll need to setup several pieces of software before going on!
+# Yep. This is just a sourced BASH script. Careful with that!
+
+# VLC interface configuration. 
+VLC_USERNAME="admin"
+VLC_PASSWORD="hackme"
+VLC_SERVER="radioserver.example.com"
+VLC_PORT=16223
+
+# VLC quality configuation. Please tweak this carefully.
+# Invalid values will turn VLC into a potato.
+VLC_CHANNELS=2
+VLC_SAMPLERATE=44100
+VLC_BITRATE=64
+
+# Web server where calendario.php and friends will be located at
+WEB_SERVER="webserver.example.com"
+
+# Icecast2 configuration
+ICECAST2_SERVER="radioserver.example.com"
+ICECAST2_USERNAME="admin"
+ICECAST2_PASSWORD="hackme"
+ICECAST2_PORT=8000
+ICECAST2_MOUNT="default"
+ICECAST2_MOUNT_USER="source"
+ICECAST2_MOUNT_PASSWORD="hackme"
+
+# Directories configuration.
+# ALL THESE directories must exist, and the scripts
+# must have r/w permissions over them
+# Create the directories if neccessary. See the README.
+RBT_BASEDIR="/home/radiobattletoads"
+RBT_LOGDIR="$RBT_BASEDIR/logs"
+RBT_MUSICADIR="$RBT_BASEDIR/musica"
+RBT_PODCASTSDIR="$RBT_BASEDIR/podcasts"
+RBT_CUNHASDIR="$RBT_BASEDIR/cunhas"
+RBT_DUMPSDIR="$RBT_BASEDIR/dumps"
+RBT_DUMPSARCHIVEDIR="$RBT_BASEDIR/dumps-archive"
+RBT_DIFERIDOSDIR="$RBT_BASEDIR/diferidos"
+RBT_SCRIPTSDIR="$RBT_BASEDIR/scripts"
+
+# Tweet every new program?
+# You must also configure ttytter. See the README.
+# true or TRUE means true, anything else means false
+USE_TWITTER="true"
+
+# The radio keeps an ogg dump of the stream. After these
+# number of days, the dumps will be erased. You can set
+# this to some high values as 999 and worry not.
+KEEPDUMPS_DAYS=12
+
+# The music located ad $RBT_MUSICADIR starting with $JINGLE_PREFIX 
+# will be trated like a jingle, and it will be inserted between
+# other songs, every $JINGLE_EVERY songs.
+JINGLE_PREFIX="rbt_cunha"
+JINGLE_EVERY=3
+
+# Purge podcasts every time.
+# true or TRUE means true, anything else means false
+# This is a workaround to a known problem:
+#  To stream the last episode of a podcast, podget keeps getting
+#  the new episodes, and deletes all but the newest. As this is
+#  done by using the file modification date and som podcasters
+#  don't set the modification dates properly on their files,
+#  sometimes newer episodes are deleted and an old one keeps
+#  streaming all the time because it has a bad modification date.
+#  Setting this to true will make the scripts delete ALL the
+#  podcasts every time, and redownload them again. This means
+#  a lot of data transfer every time, so set this value 
+#  wisely.
+PODCASTS_PURGE="true"
+

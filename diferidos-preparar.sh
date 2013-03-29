@@ -1,0 +1,98 @@
+#!/bin/bash
+#
+# Este script debe ejecutarse en un momento de baja actividad, generalmente por las noches. Puede
+# ser ejecutado varias veces durante el día, tanto como se quiera, pero cuidado que no tiene
+# protección contra sí mismo.
+# El objetivo es obtener las emisiones en diferido y prepararlas, trascondificándolas si es 
+# necesario. Ten en cuenta que para que una emisión en diferido funcione, antes ha tenido que
+# ejecutarse este script, por lo que si alguien añade una emisión en diferido poco antes de 
+# empezar y este script no se ha ejecutado, la emisión no funcionará correctamente.
+#
+
+source $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/support_functions.sh
+
+AYER=$(date -d yesterday +%s)
+TRESAMHOY=$(date -d "today 3am" +%s)
+AHORA=$(date +%s)
+
+
+# Descargar URLS definidas en el calendario
+# y extraer metadatos
+$RBT_SCRIPTSDIR/interfaz-calendario.sh diferidos | while read LINE ; do
+	echo "Preparando $LINE"
+	HORAINICIO=$(echo $LINE | sed -r 's/^.+:::(.+):::.*$/\1/')
+	PROGRAMA=$(echo $LINE | sed -r 's/^(.+):::.+:::.*$/\1/')
+	PROGRAMA_STRIPPED=$(removespecialchars $PROGRAMA)
+	URL=$(echo $LINE | sed -r 's/^.+:::.+:::(.*)$/\1/')
+	DESCARGADO="false"
+	if [ "a$URL" != "a" ] && ( [ ! -f "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.url" ] || [ "a$(cat "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.url")" != "a$URL" ] )  ; then
+		echo " - Descargando MP3"
+		wget --tries=10 $URL -O "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3"
+		DESCARGADO="true"
+	else
+		if [ $(($HORAINICIO-$AHORA)) -lt 86400 ] && [ $AHORA -gt $TRESAMHOY ] ; then
+			echo " - Preparando podcast"
+			ARCHIVO=$(ls -1 "$HOME/podcasts/RBT/$PROGRAMA/"*)
+			if [ ! -f "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3" ] ; then
+				cp "$ARCHIVO" "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3"
+				DESCARGADO="true"
+			else
+				echo " - No haciendo nada porque ya está preparado"
+	                        DESCARGADO="false"
+			fi
+		else
+			echo " - No haciendo nada porque es un podcast y falta mucho"
+			DESCARGADO="false"
+		fi
+	fi
+	if [ "a$DESCARGADO" == "atrue" ] ; then
+		echo " - Escribiendo duración, url y nombre de episodio "
+		#ID3v1
+		EMISION=$(mp3info -p %t "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3" | sed -r "s/[ ]*$PROGRAMA[ ,.:-]*[ ]*//")
+		#ID3v2
+		if [ "a" == "a$EMISION" ] ; then 
+			EMISION=$(exiftool -Title "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3" | sed -E 's/^Title[ ]*: ('"$PROGRAMA"')?[ ,.:-]*(.*)[ ]*$/\2/')
+		fi
+		echo "$EMISION" > "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.episodio"
+		DURACION=$(mp3info -p %S "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3")
+		echo $DURACION > "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.duracion"
+		echo $URL > "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.url"
+	fi
+done
+
+# Borrar cosas viejas
+find $RBT_DIFERIDOSDIR/ -iname '*.mp3' | while read p ; do
+	HORAINICIO=$(echo $p | sed -r 's/^.*-([0-9].+).mp3$/\1/')
+	if [ $(($HORAINICIO-$AYER)) -lt 0 ] ; then
+		EPISODIOFILE=$(echo $p | sed -r 's/^(.+)\.mp3$/\1.episodio/')
+		DURACIONFILE=$(echo $p | sed -r 's/^(.+)\.mp3$/\1.duracion/')
+		URLFILE=$(echo $p | sed -r 's/^(.+)\.mp3$/\1.url/')
+		rm "$p"
+		rm "$DURACIONFILE"
+		rm "$EPISODIOFILE"
+		rm "$URLFILE"
+		echo "Borrando archivo viejo $p"
+	fi
+done
+
+# Convertir los audios que haga falta conservando el tag titulo
+find $RBT_DIFERIDOSDIR/ -iname '*.mp3' | while read p ; do 
+	ORIGRATE=$(mp3info -p %Q "$p")
+	ORIGCHANNELS=$(mp3info -p %o "$p")
+	echo -e "$p [$ORIGRATE $ORIGCHANNELS]"
+	if [ "$ORIGRATE" != "44100" ] || ( [ "$ORIGCHANNELS" != "stereo" ] && [ "$ORIGCHANNELS" != "joint stereo" ] ) ; then
+		echo -ne "Convirtiendo $p... "
+		#ID3v1
+	        EMISION=$(mp3info -p %t "$p" | sed -r "s/[ ]*$PROGRAMA[ ,.:-]*[ ]*//")
+	        #ID3v2
+        	if [ "a" == "a$EMISION" ] ; then
+	                EMISION=$(exiftool -Title "$p" | sed -E 's/^Title[ ]*: ('"$PROGRAMA"')?[ ,.:-]*(.*)[ ]*$/\2/')
+	        fi
+		mv "$p" "$p.old.mp3"
+		nice -n 10 sox "$p.old.mp3" --rate 44100 --channels 2 -t wav - | lame - "$p" 2> /dev/null
+		rm "$p.old.mp3"
+		mp3info -t "$EMISION" "$p"
+		echo " [DONE]"
+	fi
+done
+

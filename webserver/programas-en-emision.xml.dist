@@ -1,0 +1,30 @@
+<emisiones>
+        <emision>
+                <nombre>Program name</nombre>
+                <tematica>Program tagline</tematica>
+                <descripcion>Program descripcion</descripcion>
+                <web>Website URL</web>
+		<twitter>rbattletoads</twitter>
+		<chat>Chat URL</chat>
+                <icono>Squared icon URL in PNG format</icono>
+                <stream>Direct URL to the stream. Links to .m3u and other playlists are NOT supported. This must point directly to the stream URL</stream>
+                <podcast>Podcast RSS URL</podcast>
+                <calendario>Google Calendar Private full XML URL</calendario>
+                <horario>
+                        <dia>Day, from 1 to 7. A * means everyday. 0 won't work</dia>
+                        <horainicio>19:00</horainicio>
+                        <horafin>20:30</horafin>
+                </horario>
+		<horario>
+                        <dia>Another day for another schedule. You can add as much of these as needed</dia>
+                        <horainicio>12:00</horainicio>
+                        <horafin>25:30</horafin>
+                </horario>
+                <horario_textual>
+                        <directo>textual representation of the live stream schedule</directo>
+                        <diferido>textual representation of the recorded stream schedule</diferido>
+                </horario_textual>
+                <etiqueta>Theme tag</etiqueta>
+		<etiqueta>Another theme tag, you can add more</etiqueta>
+        </emision>
+</emisiones>

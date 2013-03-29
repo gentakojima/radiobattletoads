@@ -1,0 +1,40 @@
+<?php
+
+/* Refresh the radio calendar every 220 seconds. Setting this to anything lower than 30
+ * is a bad idea, so don't do that.  */
+$REFRESH_SECS=220;
+
+/* Global calendar URL. Ok, the global calendar is useless right now, but still, you MUST
+ * create a calendar on Google calendar and paste the full XML private URL here and never
+ * EVER use it for anything */
+$GLOBAL_CALENDAR="";
+
+/* URL where the "~/diferidos" directory from the RADIO SERVER can be reached. This is
+ * very optional, but recommended. Whithout this, the script can't get the recorded
+ * actual duration, and will always use the duration specified on the calendar */
+$DIFERIDOS_URL="http://radio.example.com/diferidos";
+
+/* VLC server location for getting current song when playing music. This is optional,
+ * but highly recommended */
+$VLC_SERVER="radio.example.com";
+$VLC_PORT="16223";
+
+/* Icecast server location for getting statistics. Not required for calendario.php,
+ * though */
+$ICECAST2_SERVER="radio.example.com";
+$ICECAST2_USERNAME="admin";
+$ICECAST2_PASSWORD="hackme";
+$ICECAST2_PORT=8000;
+
+/* URL there the "~/.cache/vlc/art" directory from the RADIO SERVER can be reached. This
+ * is also optional, but will fetch art covers automatically, and you probably want that
+ * feature. */
+$VLC_ARTURL='http://radio.example.com/images/vlc-cache';
+
+/* Artwork when playing music */
+$ICON_MUSIC='http://webserver.example.com/images/icons/musica.png';
+
+/* Artwork when the radio is not working */
+$ICON_NOTWORKING='http://webserver.example.com/images/icons/cortada.png';
+
+?>

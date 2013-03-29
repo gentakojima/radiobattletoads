@@ -1,0 +1,206 @@
+Mandatory disclaimer: 
+
+ This software has been hacked for a particular purpose, and it might not fit
+ yours. You're free to fork and take this to a better quality coding status. 
+ And I'll be happy to receive pull requests on that direction, even when I
+ won't be working myself actively on that right now.
+
+Clarified that, there we go:
+
+== WHAT'S THIS ==
+
+This is the code running the online radio Radio Battletoads
+(http://www.radiobattletoads.com). It's main features are:
+
+  * Read the schedule from Google Calendar and setup everything automatically
+  * Supports live streams on mp3 and ogg
+  * Supports non-live streams by taking: wether a mp3 URL, or the last episode
+    of a podcast RSS
+  * Streams random music while there's nothing to stream
+  * Supports jingles shuffled with the music
+  * Supports simple curtains to indicat the start or ending of a program
+  * Streams everything on ogg vorbis (yay!)
+
+== ARCHITECTURE ==
+
+The main architecture of the radio consists of:
+
+ * WEB SERVER: Running the radio website (code not included) and the public API
+ * STREAMING SERVER: Containing all bash scripts, icecast and VLC (also an 
+   optional http server to provide additional information to the WEB SERVER)
+
+== LANGUAGES ==
+
+The WEB SERVER part is completely written in BASH. The WEB SERVER part is
+completly written in PHP. NO reason for that. I'd write everything on BASH, but
+not everything on PHP, so I made this compromise.
+
+== DEPENDENCIES ==
+
+The WEB SERVER needs:
+  * Apache 2.2, PHP 5.2.
+
+The STREAMING SERVER needs:
+  * Debian compatible GNU/Linux OS, VLC 2.0, Icecast 2.3, Ttytter 2.0, Podget, 
+    wget, curl, lame, libogg, libvorbis.
+
+== INSTALLATION ==
+
+The installation procedure is hard and can take several hours, depending on
+your skills with the technologies involved. I've divided it into 4 steps:
+
+   1. Installation of the streaming server
+   2. Installation of the web server
+   3. Validation of the web server
+   4. Initial setup of the streaming server
+   5. Contrab rules everything
+
+STEP 1. INSTALLATION OF STREAMING SERVER
+
+Create a new user just for the radio. This is not required, but hightly 
+recommended.
+
+Start by installing and setting up Icecast. You must be able to send data from
+any icecast source (such a a VLC running on your machine), and getting to the 
+admin interface via HTTP. Icecast should be running all the time. Check that
+it's being started on the system startup.
+
+Install VLC. No further steps required for it to work.
+
+OPTIONAL: If you want the web server to get the music artwork automatically, 
+you must also install lighttpd and serve the ".cache/vlc/art" directory.
+
+Install ttytter and setup an account on your radio user. You should be able to
+tweet by issuing the command "ttytter -status='Something else'".
+
+Install Podget. Configure the dir_library on the file ".podget/podgetrc" of
+your radio user (i.e: dir_library=/home/radiobattletoads/podcasts)
+
+Create the "~/scripts" directory and copy every .sh file and the .conf.dist
+file inside.
+
+Create the "~/cunhas" directory and copy every .mp3 file from the jingles
+subdirectory inside.
+
+Create these additional directories: "~/logs", "~/dumps-archive", "~/dumps", 
+"~/musica", "~/diferidos".
+
+OPTIONAL (but recommended): If you want the schedule to get the recorded
+programs duration and adapt the schedule accordingly, you must serve the
+"~/diferidos" directory through HTTP. That lighttpd already serving the VLC
+cached artworks might come in handy for this.
+
+Copy the file "~/scripts/radiobattletoads.conf.dist" to "~/scripts/
+radiobattletoads.conf" and setup all the values. Everything is required.
+Don't try to go on without checking every single value because everything
+will fail.
+
+OPTIONAL: You may have noticed that you can change the directory locations on 
+the configuration file. It should work, but it is NOT supported by now. It will
+probably crash.
+
+Now everything is in place. Now, you need to install the WEB SERVER.
+
+STEP 2. INSTALLATION OF THE WEB SERVER
+
+Place every .php file and the programas-en-emision.xml.dist from the webserver
+directory on the /api path of your webserver. Everything else will fail for 
+now, sorry.
+
+Please make sure that the webserver can write to a file named "rejects.txt" on 
+that directory. Creating the file and setting rw permissions to all should do 
+the trick.
+
+Create also these directories and set rw permissions to the web server user:
+"/api/cache", "/images/musica".
+
+Copy the file "programas-en-emision.xml.dist" to "programas-en-emision.xml" and
+set up at least one program. You must provide a name and a private URL to
+a different Google Calendar full XML for every program. Also, you must setup 
+the accepted time frames for every program. Everything else is optional, but 
+still recommended.
+There is no reference documentation for this file, but you can take a look at
+the Radio Battletoads file at http://www.radiobattletoads.com/api and mimic it.
+
+Copy the file "configuration.php.dist" to "configuration.php" and setup at least
+the global calendar URL. The file is self explanatory.
+
+
+STEP 3. VALIDATION OF THE WEB SERVER
+
+Add an entry on the calendar associated to a program on Google Calendar. After
+5 minutes, it should be on the XML returned by calendar.php OR rejected, on
+the rejects.txt file.
+
+If something is not working, double check this:
+
+ * You're actually providing Google Calendar Private full XML URLS. These URLs
+   are like this: http://www.google.com/calendar/feeds/<identifier>/private-
+   <another-identifier>/full
+ * You're setting up the entries properly. The calendar usage is explained at
+   http://wiki.radiobattletoads.com/como-emitir#programar_las_emisiones
+ * The rw permissions are setup properly. Check if files are being created on
+   the cache subdirectory.
+
+STEP 4. INITIAL SETUP OF THE STREAMING SERVER
+
+Put at least one 44100Hz, stereo mp3 file at "~/music/". 
+
+Generate the first music playlist by issuing manually "~/scripts/
+musica-generarplaylist.sh".
+
+Download the first podcasts by issuing manually "~/scripts/
+podcasts-generar_serverlist.sh", and then "~/scripts/podcasts-descargar.sh".
+
+Prepare the podcasts and download the mp3 files so they can be streamed by 
+issuing manually "~/scripts/diferidos-preparar.sh".
+
+Run VLC by issuing "~/scripts/interfaz-vlc.sh run". Check the output at
+"/tmp/vlc_logging". You might need to adjust some values again at the
+configuration file to get it working. The stream should show up on the
+Icecast admin interface. If not, fix that before continuing. Remember to
+completely kill VLC before any new attempt: "~/scripts/interfaz-vlc.sh kill".
+
+Run the calendar interface to see if the calendar can be reached properly.
+Issue "~/scripts/interfaz-calendario.sh ahora" to see the current program.
+If you can't see anything, fix that before continuing.
+
+Run the control script to see if everything behaves OK. Issue "~/scripts/
+control.sh" several times at different situations and check that the radio is 
+putting and removing the programs on schedule.
+
+STEP 5. CRONTAB RULES EVERYTHING
+
+All the scripts you've been running on the initial run, need to be run again
+with different paces. You must setup cronjobs to do this.
+
+A sample cronjob file is included on the file "crontab.example", but feel
+free to adjust the times following your own needs.
+
+The logs will tell you the commands runned, and the actions taken. Continue
+looking at these logs for a while after the initial setup to check that
+everything runs as expected.
+
+== ISSUES ==
+
+If you're interested on deploying your own radio by using this code and you
+run into issues, feel free to contact me at yo@jorgesuarezdelis.name.
+
+== COPYRIGHT ==
+ 
+Radio Battletoads
+Copyright (C) 2013 Jorge Suárez de Lis <yo@jorgesuarezdelis.name>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
