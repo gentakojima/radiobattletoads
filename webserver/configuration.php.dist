@@ -35,7 +35,7 @@ $ICECAST2_PORT=8000;
 $VLC_ARTURL='http://radio.example.com/images/vlc-cache';
 
 /* Artwork when playing music */
-$ICON_MUSIC='http://webserver.example.com/images/icons/musica.png';
+$ICON_MUSICA='http://webserver.example.com/images/icons/musica.png';
 
 /* Artwork when the radio is not working */
 $ICON_NOTWORKING='http://webserver.example.com/images/icons/cortada.png';
