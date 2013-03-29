@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 #
 # Este script no se ejecuta normalmente de forma directa. Es llamado por otros scripts.
 # El objetivo es servir de interfaz contra VLC de lectura/escritura. Se puede consultar
