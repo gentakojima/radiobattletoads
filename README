@@ -19,7 +19,7 @@ This is the code running the online radio Radio Battletoads
     of a podcast RSS
   * Streams random music while there's nothing to stream
   * Supports jingles shuffled with the music
-  * Supports simple curtains to indicat the start or ending of a program
+  * Supports simple curtains to indicate the start or ending of a program.
   * Streams everything on ogg vorbis (yay!)
 
 
@@ -34,7 +34,7 @@ The main architecture of the radio consists of:
 
 == LANGUAGES ==
 
-The WEB SERVER part is completely written in BASH. The WEB SERVER part is
+The STREAMING SERVER part is completely written in BASH. The WEB SERVER part is
 completly written in PHP. NO reason for that.
 
 
@@ -62,72 +62,73 @@ your skills with the technologies involved. I've divided it into 5 steps:
 
 STEP 1. INSTALLATION OF STREAMING SERVER
 
+Setup a Debian or a Ubuntu server. Other GNU/Linux should also do the trick.
+
 Create a new user just for the radio. This is not required, but highly 
 recommended.
 
 Start by installing and setting up Icecast. You must be able to send data from
-any icecast source (such a a VLC running on your machine), and getting to the 
-admin interface via HTTP. Icecast should be running all the time. Check that
-it's being started on the system startup.
+any icecast source (such as VLC running on your machine, for example), and 
+getting to the admin interface via HTTP. Icecast should be running all the 
+time. Check that Icecast is being started on the system startup.
 
-Install VLC. No further steps required for it to work.
+Install VLC. No further steps required for VLC to work.
 
 OPTIONAL: If you want the web server to get the music artwork automatically, 
 you must also install lighttpd and serve the ".cache/vlc/art" directory.
 
-Install ttytter and setup an account on your radio user. You should be able to
-tweet by issuing the command "ttytter -status='Something else'".
+Install ttytter and setup an account. The radio user should be able to tweet
+by issuing the command "ttytter -status='Something else'".
 
-Install Podget. Configure the dir_library on the file ".podget/podgetrc" of
-your radio user (i.e: dir_library=/home/radiobattletoads/podcasts)
+Install Podget. Configure the dir_library on the file ".podget/podgetrc" 
+(i.e: dir_library=/home/radiobattletoads/podcasts) on your radio user profile.
 
 Create the "~/scripts" directory and copy every .sh file and the .conf.dist
-file inside.
+file inside it.
 
 Create the "~/cunhas" directory and copy every .mp3 file from the jingles
-subdirectory inside.
+subdirectory inside it.
 
 Create these additional directories: "~/logs", "~/dumps-archive", "~/dumps", 
 "~/musica", "~/diferidos".
 
 OPTIONAL (but recommended): If you want the schedule to get the recorded
 programs duration and adapt the schedule accordingly, you must serve the
-"~/diferidos" directory through HTTP. That lighttpd already serving the VLC
-cached artworks might come in handy for this.
+"~/diferidos" directory through HTTP and configure it later on the web server.
 
 Copy the file "~/scripts/radiobattletoads.conf.dist" to "~/scripts/
 radiobattletoads.conf" and setup all the values. Everything is required.
-Don't try to go on without checking every single value because everything
+Don't try to continue without checking every single value because everything
 will fail.
 
-OPTIONAL: You may have noticed that you can change the directory locations on 
-the configuration file. It should work, but it is NOT supported by now. It will
+OPTIONAL: You might have noticed that you can change the directory locations on 
+the configuration file. That should work, but it is NOT tested by now. It will
 probably make everything crash badly.
 
 
 STEP 2. INSTALLATION OF THE WEB SERVER
 
 Place every .php file and the programas-en-emision.xml.dist from the webserver
-directory on the /api path of your webserver. Everything else will fail for 
-now, sorry.
+directory on the /api path of your webserver.
 
 Please make sure that the webserver can write to a file named "rejects.txt" on 
-that directory. Creating the file and setting rw permissions to all should do 
-the trick.
+the /api directory. Creating the file and setting rw permissions to all users
+should do the trick.
 
-Create also these directories and set rw permissions to the web server user:
+Create also these directories and set rwx permissions to the web server user:
 "/api/cache", "/images/musica".
 
 Copy the file "programas-en-emision.xml.dist" to "programas-en-emision.xml" and
-set up at least one program. You must provide a name and a private URL to
-a different Google Calendar full XML for every program. Also, you must setup 
-the accepted time frames for every program. Everything else is optional, but 
-still recommended.
+set up at least one program. For each program, you must:
+ * provide a name and a private URL to a different Google Calendar full XML
+ * setup the accepted time frames
+Everything else is optional and only intended for showing on the website.
 There is no reference documentation for this file, but you can take a look at
 the Radio Battletoads file at http://www.radiobattletoads.com/api and mimic it.
 
 Copy the file "configuration.php.dist" to "configuration.php" and setup at least
-the global calendar URL. The file is self explanatory.
+the global calendar URL. You can algo setup the path to the optional features
+of the step 1 and some other optional featurecandy.
 
 
 STEP 3. VALIDATION OF THE WEB SERVER
@@ -166,11 +167,11 @@ configuration file to get it working. The stream should show up on the
 Icecast admin interface. If not, fix that before continuing. Remember to
 completely kill VLC before any new attempt: "~/scripts/interfaz-vlc.sh kill".
 
-Run the calendar interface to see if the calendar can be reached properly.
+Run the calendar interface to see if the calendar can be reached properly:
 Issue "~/scripts/interfaz-calendario.sh ahora" to see the current program.
-If you can't see anything, fix that before continuing.
+If you can't see anything, you must fix that before continuing.
 
-Run the control script to see if everything behaves OK. Issue "~/scripts/
+Run the control script to see if everything behaves OK: Issue "~/scripts/
 control.sh" several times at different situations and check that the radio is 
 putting and removing the programs on schedule.
 
@@ -186,6 +187,7 @@ free to adjust the times following your own needs.
 The logs will tell you the commands runned, and the actions taken. Continue
 looking at these logs for a while after the initial setup to check that
 everything runs as expected.
+
 
 == ISSUES ==
 
