@@ -5,7 +5,8 @@ Mandatory disclaimer:
  And I'll be happy to receive pull requests on that direction, even when I
  won't be working myself actively on that right now.
 
-Clarified that, there we go:
+That being clarified, there we go:
+
 
 == WHAT'S THIS ==
 
@@ -21,6 +22,7 @@ This is the code running the online radio Radio Battletoads
   * Supports simple curtains to indicat the start or ending of a program
   * Streams everything on ogg vorbis (yay!)
 
+
 == ARCHITECTURE ==
 
 The main architecture of the radio consists of:
@@ -29,11 +31,12 @@ The main architecture of the radio consists of:
  * STREAMING SERVER: Containing all bash scripts, icecast and VLC (also an 
    optional http server to provide additional information to the WEB SERVER)
 
+
 == LANGUAGES ==
 
 The WEB SERVER part is completely written in BASH. The WEB SERVER part is
-completly written in PHP. NO reason for that. I'd write everything on BASH, but
-not everything on PHP, so I made this compromise.
+completly written in PHP. NO reason for that.
+
 
 == DEPENDENCIES ==
 
@@ -44,10 +47,11 @@ The STREAMING SERVER needs:
   * Debian compatible GNU/Linux OS, VLC 2.0, Icecast 2.3, Ttytter 2.0, Podget, 
     wget, curl, lame, libogg, libvorbis.
 
+
 == INSTALLATION ==
 
 The installation procedure is hard and can take several hours, depending on
-your skills with the technologies involved. I've divided it into 4 steps:
+your skills with the technologies involved. I've divided it into 5 steps:
 
    1. Installation of the streaming server
    2. Installation of the web server
@@ -55,9 +59,10 @@ your skills with the technologies involved. I've divided it into 4 steps:
    4. Initial setup of the streaming server
    5. Contrab rules everything
 
+
 STEP 1. INSTALLATION OF STREAMING SERVER
 
-Create a new user just for the radio. This is not required, but hightly 
+Create a new user just for the radio. This is not required, but highly 
 recommended.
 
 Start by installing and setting up Icecast. You must be able to send data from
@@ -97,9 +102,8 @@ will fail.
 
 OPTIONAL: You may have noticed that you can change the directory locations on 
 the configuration file. It should work, but it is NOT supported by now. It will
-probably crash.
+probably make everything crash badly.
 
-Now everything is in place. Now, you need to install the WEB SERVER.
 
 STEP 2. INSTALLATION OF THE WEB SERVER
 
@@ -142,6 +146,7 @@ If something is not working, double check this:
  * The rw permissions are setup properly. Check if files are being created on
    the cache subdirectory.
 
+
 STEP 4. INITIAL SETUP OF THE STREAMING SERVER
 
 Put at least one 44100Hz, stereo mp3 file at "~/music/". 
@@ -169,6 +174,7 @@ Run the control script to see if everything behaves OK. Issue "~/scripts/
 control.sh" several times at different situations and check that the radio is 
 putting and removing the programs on schedule.
 
+
 STEP 5. CRONTAB RULES EVERYTHING
 
 All the scripts you've been running on the initial run, need to be run again
@@ -185,6 +191,7 @@ everything runs as expected.
 
 If you're interested on deploying your own radio by using this code and you
 run into issues, feel free to contact me at yo@jorgesuarezdelis.name.
+
 
 == COPYRIGHT ==
  
