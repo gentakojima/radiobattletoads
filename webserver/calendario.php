@@ -320,7 +320,7 @@ if($opciones["ahora"]==true){
 			        // Si no hay la buscamos en la caché del VLC del servidor del directo y la copiamos a este servidor
                                 preg_match('/^<art_url>(.*)<\/art_url>.*/',strstr($track,'<art_url>'),$art_url);
 			        $art_url = preg_replace('/<!\[CDATA\[(.*)\]\]>/','$1',$art_url);
-			        $art_url = preg_replace('/file:\/\/\/.*\/.cache\/vlc\/art',$VLC_ARTURL, $art_url[1]);
+			        $art_url = preg_replace('/file:\/\/\/.*\/.cache\/vlc\/art/',$VLC_ARTURL, $art_url[1]);
 			        if(strlen($art_url!=0) && get_http_response_code($art_url)!='404'){
 				        $imagen = @file_get_contents($art_url);
 				        if($imagen!=FALSE){
