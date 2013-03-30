@@ -170,11 +170,18 @@ for p in ${ACCIONES[@]} ; do
 			fi
 		;;
 		"vaciar")
+			# Caches stream URL so VLC won't have to wait for the script to resolve the 
+			# stream URL after empty the list
+			if [ ! -z "$PROGRAMA_QUE_DEBERIA_EMITIRSE" ] ; then
+				URL_STREAM=$($RBT_SCRIPTSDIR/interfaz-calendario.sh stream "$PROGRAMA_QUE_DEBERIA_EMITIRSE")
+			fi
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh clear
 		;;
 		"directo")
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh addfile "$RBT_CUNHASDIR/cortinilla_corta.mp3"
-			URL_STREAM=$($RBT_SCRIPTSDIR/interfaz-calendario.sh stream "$PROGRAMA_QUE_DEBERIA_EMITIRSE")
+			if [ -z "$URL_STREAM" ] ; then 
+				URL_STREAM=$($RBT_SCRIPTSDIR/interfaz-calendario.sh stream "$PROGRAMA_QUE_DEBERIA_EMITIRSE")
+			fi
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_1a.mp3"
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
