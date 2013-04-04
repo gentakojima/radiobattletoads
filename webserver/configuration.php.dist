@@ -22,6 +22,10 @@ $VLC_PORT="16223";
 /* Web server location */
 $WEB_SERVER="webserver.example.com"
 
+/* Update key. Anyone with this key can push data onto the cache, so please, change
+ * it and don't share it with anybody.  */
+$UPDATE_KEY="set-the-same-key-on-the-radio-server";
+
 /* Icecast server location for getting statistics. Not required for calendario.php,
  * though */
 $ICECAST2_SERVER="radio.example.com";
