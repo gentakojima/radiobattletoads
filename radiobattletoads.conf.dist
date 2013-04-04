@@ -17,6 +17,7 @@ VLC_BITRATE=64
 
 # Web server where calendario.php and friends will be located at
 WEB_SERVER="webserver.example.com"
+WEB_KEY="set-on-webserver-configuration"
 
 # Icecast2 configuration
 ICECAST2_SERVER="radioserver.example.com"

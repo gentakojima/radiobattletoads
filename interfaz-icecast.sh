@@ -33,7 +33,7 @@ case $COMANDO in
 	actualizainfostream)
 		echo -ne "Actualizando info stream..."
 		ARGUMENTO=$(echo "$ARGUMENTO" | sed 's/&#39;/'\''/')
-		wget "$URL_ICECAST/metadata?mount=/$ICECAST2_MOUNT&mode=updinfo&song=$ARGUMENTO"
+		$WGETCMD "$URL_ICECAST/metadata?mount=/$ICECAST2_MOUNT&mode=updinfo&song=$ARGUMENTO"
 		showok $?
 	;;
 esac

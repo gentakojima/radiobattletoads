@@ -25,6 +25,25 @@ $opciones["ahora"] = true;
 $opciones["calendario"] = true;
 if($_GET["ahora"]=="0") $opciones["ahora"] = false;
 if($_GET["calendario"]=="0") $opciones["calendario"] = false;
+f($_GET["update"]=="1"){
+    $opciones["update"] = true;
+    $opciones["ahora"] = false;
+    $opciones["calendario"] = false;
+    if($_GET["key"]!=$UPDATE_KEY) die("Bad key!");
+}
+
+/* Modo update */
+if($opciones["update"]==true){
+    if($_GET["v"]) file_put_contents("cache/current_song",$_GET["v"]);
+    if($_FILES["file"] && $_FILES["file"]["error"] == 0){
+        if(!is_dir("cache/artwork")) mkdir("cache/artwork");
+        echo "uploading file";
+        echo move_uploaded_file($_FILES["file"]["tmp_name"],"cache/artwork/{$_FILES["file"]["name"]}.jpg");
+    }
+    $local_url = $_SERVER['DOCUMENT_ROOT']."/api/cache/artwork/{$_GET["v"]}.jpg";
+    if(file_exists($local_url)) die("ok");
+    else die("needs_artwork");
+}
 
 /* Medir rendimiento */
 
@@ -297,57 +316,23 @@ foreach ( $entries_xml as $entry_xml ) {
  }
 
 if($opciones["ahora"]==true){
-        // Si la variable que marca el título actual no está llena, estamos emitiendo música ininterrumpida.
-        // Conectamos a la playlist del VLC para ver la canción actual
-        if($runningShow!=null) $now=$runningShow;
-        else{
-                $xml = @file_get_contents("http://{$VLC_SERVER}:{$VLC_PORT}/requests/status.xml");
-                if($xml){
-                        preg_match('/^<info name=\'title\'>([^<]*)<\/info>.*/',strstr($xml,'<info name=\'title'),$title);
-                        preg_match('/.*<info name=\'artist\'>([^<]*)<\/info>.*/',strstr($xml,'<info name=\'artist'),$artist);
-                        $title = preg_replace('/<!\[CDATA\[(.*)\]\]>/','$1',$title);
-                        $artist = preg_replace('/<!\[CDATA\[(.*)\]\]>/','$1',$artist);
-		        $title[1] = trim($title[1]);
-		        $artist[1] = trim($artist[1]);
-                        $now['programa'] = 'Música Ininterrumpida';
-                        $now['episodio'] = "$artist[1] - $title[1]";
-		        // Buscamos carátula en el servidor
-                        $local_url = $_SERVER['DOCUMENT_ROOT'].'/images/musica/'. html_entity_decode($artist[1].' - '.$title[1],ENT_QUOTES).'.jpg';
-                        if(file_exists($local_url)){
-                                $now['icono'] = 'http://'.$WEB_SERVER.'/images/musica/'.rawurlencode(html_entity_decode($artist[1].' - '.$title[1],ENT_QUOTES)).'.jpg';
-                        }
-                        else{
-			        // Si no hay la buscamos en la caché del VLC del servidor del directo y la copiamos a este servidor
-                                preg_match('/^<art_url>(.*)<\/art_url>.*/',strstr($track,'<art_url>'),$art_url);
-			        $art_url = preg_replace('/<!\[CDATA\[(.*)\]\]>/','$1',$art_url);
-			        $art_url = preg_replace('/file:\/\/\/.*\/.cache\/vlc\/art/',$VLC_ARTURL, $art_url[1]);
-			        if(strlen($art_url!=0) && get_http_response_code($art_url)!='404'){
-				        $imagen = @file_get_contents($art_url);
-				        if($imagen!=FALSE){
-				                file_put_contents("../images/musica/{$artist[1]} - {$title[1]}.jpg",$imagen);
-				                $now['icono'] = 'http://'.$WEB_SERVER.'/images/musica/'.rawurlencode(html_entity_decode($artist[1].' - '.$title[1],ENT_QUOTES)).'.jpg';
-			                }
-			                else{
-			                        // Y si no hay ponemos un icono por defecto
-				        $now['icono'] = $ICON_MUSICA;
-			                }
-			        }
-			        else{
-				        // Y si no hay ponemos un icono por defecto
-				        $now['icono'] = $ICON_MUSICA;
-			        }
-                        }
-		        $now['twitter']='';
-		        $now['chat']='';
-                }
-                else{
-                        $now['programa'] = 'Emisión cortada';
-                        $now['episodio'] = 'La radio no está emitiendo en estos momentos';
-                        $now['icono'] = $ICON_NOTWORKING;
-		        $now['twitter']='';
-		        $now['chat']='';
-                }
+    // Si la variable que marca el título actual no está llena, estamos emitiendo música ininterrumpida.
+    // Conectamos a la playlist del VLC para ver la canción actual
+    if($runningShow!=null) $now=$runningShow;
+    else{
+        $track = file_get_contents("cache/current_song");
+        $now["programa"] = "Música Ininterrumpida";
+        $now["episodio"] = $track;
+        $local_url = $_SERVER['DOCUMENT_ROOT']."/api/cache/artwork/{$track}.jpg";
+        if(file_exists($local_url)){
+            $now['icono'] = "http://$WEB_SERVER/api/cache/artwork/{$track}.jpg";
         }
+        else{
+            $now['icono'] = $ICON_MUSICA;
+        }
+        $now['twitter']='';
+        $now['chat']='';
+    }
 }
 
 /* Funciones apoyo */

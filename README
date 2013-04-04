@@ -28,7 +28,8 @@ This is the code running the online radio Radio Battletoads
 
   * Actions can only be taken only once in a minute, and the scheduler takes
     several seconds to run, so every scheduled show might start between 1
-    and 2 minutes later. This is important for live shows.
+    and 2 minutes later. This is important for live shows. [ There are plans
+    to fix this ]
   * The generated calendar is cached, so changes to a Googler Calendar won't be
     instantly reflected on the generated calendar (takes up to 3.5 minutes by 
     default for changes to take effect)
@@ -40,8 +41,19 @@ This is the code running the online radio Radio Battletoads
   * If something interrupts a recorded show (a server restart, a manual VLC
     kill or whatever), once the radio is up and running again, the show will
     be aired again from the start, and will be cut anyways at the original
-    end time [There are plans to fix this some day]
+    end time [ There are plans to fix this]
 
+== TODO ==
+
+  * Push recorded shows data to the webserver instead asking it from
+    calendar.php [ Should push-webserver.sh do this? ]
+  * Remove wget dependency in favor of curl
+  * Urgent cleanup: calendario.php
+  * Restart recorded shows at the correct time instead of starting 
+    over again
+  * Move the control radio logic to a daemon (in the same fashion as
+    push-webserver.sh) instead of relying on cronjobs.
+  * General cleanup
 
 == ARCHITECTURE ==
 
@@ -94,9 +106,6 @@ time. Check that Icecast is being started on the system startup.
 
 Install VLC. No further steps required for VLC to work.
 
-OPTIONAL: If you want the web server to get the music artwork automatically, 
-you must also install lighttpd and serve the ".cache/vlc/art" directory.
-
 Install GNU Screen.
 
 Install ttytter and setup an account. The radio user should be able to tweet
@@ -137,8 +146,8 @@ Please make sure that the webserver can write to a file named "rejects.txt" on
 the /api directory. Creating the file and setting rw permissions to all users
 should do the trick.
 
-Create also these directories and set rwx permissions to the web server user:
-"/api/cache", "/images/musica".
+Create also the directory "api/cache" and set rwx permissions to the web server 
+user: "/api/cache"
 
 Copy the file "programas-en-emision.xml.dist" to "programas-en-emision.xml" and
 set up at least one program. For each program, you must:
@@ -198,7 +207,7 @@ control.sh" several times at different situations and check that the radio is
 putting and removing the programs on schedule.
 
 
-STEP 5. CRONTAB RULES EVERYTHING
+STEP 5. CRONTAB RULES (ALMOST) EVERYTHING
 
 All the scripts you've been running on the initial run, need to be run again
 with different paces. You must setup cronjobs to do this.
@@ -210,6 +219,15 @@ The logs will tell you the commands runned, and the actions taken. Continue
 looking at these logs for a while after the initial setup to check that
 everything runs as expected.
 
+There's an exception: the information about the songs playing is pushed by
+a daemon to the webserver. This is where were are going, it's not just a
+random oddity. It's planned to move from cronjob-based radio control to a
+daemon-based approach in the future.
+
+This daemon, "~/scripts/push-webserver.sh" has to be run from the init. A
+sampe initscript, "radiobattletoads.init" is provided. Copy it into "/etc/
+init.d/radiobattletoads", enable it by issuing as root "update-rc.d 
+radiobattletoads defaults".
 
 == ISSUES ==
 

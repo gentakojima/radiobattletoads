@@ -34,6 +34,7 @@ if [ -z "$COMANDO" ] ; then
 	echo " kill	Mata a todo VLC viviente"
 	echo " run	Ejecuta el VLC"
 	echo " restart	Mata a todo VLC viviente y vuelve a ejecutarlo"
+	echo " current id|name|url|programa|artist-track|artwork Show current track information"
 	exit 1
 fi
 
@@ -135,26 +136,63 @@ case $COMANDO in
 		done
 	;;
 	current)
-		wget --quiet -O /tmp/vlc_playlist $URL_PLAYLIST
-                LINE=`cat /tmp/vlc_playlist | grep "<leaf" | grep current`
 		case $ARGUMENTO in
 			id)
+				wget --quiet -O /tmp/vlc_playlist $URL_PLAYLIST
+		                LINE=`cat /tmp/vlc_playlist | grep "<leaf" | grep current`
 				OUTPUT=$(echo $LINE |sed -r 's/.*id=\"([0-9]+)\".*/\1/')
+				echo "$OUTPUT"
 			;;
 			name)
+				wget --quiet -O /tmp/vlc_playlist $URL_PLAYLIST
+		                LINE=`cat /tmp/vlc_playlist | grep "<leaf" | grep current`
 				OUTPUT=$(echo $LINE |sed -r 's/.*name=\"([^"]+)\".*/\1/')
+				echo "$OUTPUT"
 			;;
 			url)
+				wget --quiet -O /tmp/vlc_playlist $URL_PLAYLIST
+		                LINE=`cat /tmp/vlc_playlist | grep "<leaf" | grep current`
 				OUTPUT=$(echo $LINE |sed -r 's/.*uri=\"([^"]+)\".*/\1/')
+				echo "$OUTPUT"
 			;;
 			programa)
+				wget --quiet -O /tmp/vlc_playlist $URL_PLAYLIST
+		                LINE=`cat /tmp/vlc_playlist | grep "<leaf" | grep current`
 				URL=$(echo $LINE |sed -r 's/.*uri=\"([^"]+)\".*/\1/')
 				OUTPUT=$($RBT_SCRIPTSDIR/interfaz-calendario.sh nombre "$URL")
+				echo "$OUTPUT"
+			;;
+			artist-track)
+				wget --quiet -O /tmp/vlc_status $URL_STATUS
+				while read LINE ; do
+					echo "$LINE" | grep "name='artist'" &>/dev/null
+					if [ $? -eq 0 ] ; then
+						ARTIST="$(echo "$LINE" | sed -r "s/.*name='artist'>([^<]*)<\/info>.*/\1/")"
+					fi
+					echo "$LINE" | grep "name='title'" &>/dev/null
+					if [ $? -eq 0 ] ; then
+						TITLE="$(echo "$LINE" | sed -r "s/.*name='title'>([^<]*)<\/info>.*/\1/")"
+					fi
+				done < /tmp/vlc_status
+				ARTISTTITLE="$(printf %b "${ARTIST//%/\x} - ${TITLE//%/\x}")"
+				echo "$ARTISTTITLE"
+			;;
+			artwork)
+				wget --quiet -O /tmp/vlc_status $URL_STATUS
+                                while read LINE ; do
+                                        echo "$LINE" | grep "name='artwork_url'" &>/dev/null
+                                        if [ $? -eq 0 ] ; then
+                                                ARTWORK="$(echo "$LINE" | sed -r "s/.*name='artwork_url'>file:\/\/([^<]*)<\/info>.*/\1/")"
+						ARTWORK="$(printf %b "${ARTWORK//%/\x}")"
+                                        fi
+                                done < /tmp/vlc_status
+                                echo "$ARTWORK"
 			;;
 			*)
-				OUTPUT=$(echo $LINE |sed -r 's/.*uri=\"(.+)\" name=.*/\1/'|sed -r 's/%20/ /g')
+				wget --quiet -O /tmp/vlc_playlist $URL_PLAYLIST
+		                LINE=`cat /tmp/vlc_playlist | grep "<leaf" | grep current`
+				echo "$OUTPUT"
 		esac
-		echo "$OUTPUT"
 	;;
 	kill)
 		VLCPID=$(pgrep -x vlc)
