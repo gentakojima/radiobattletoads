@@ -26,3 +26,11 @@ function removespecialchars(){
 	echo $@ | sed -r 's/[^abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ]//g'
 }
 
+function urlencode(){
+	echo "$(echo "$1" | perl -lpe 's/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg')"
+}
+
+function urldecode(){
+	echo "$(printf %b "${1//%/\x}")"
+}
+

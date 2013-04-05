@@ -1,0 +1,43 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          radiobattletoads
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Radio Battletoads
+# Description:       Runs requires scripts for Radio Battletoads
+### END INIT INFO
+
+# Author: Jorge Suarez de Lis <jorge.suarez@usc.es>
+
+do_start()
+{
+	nohup /home/radiobattletoads/scripts/push-webserver.sh 0<&- &>/dev/null &
+}
+
+do_stop()
+{
+	killall push-webserver.sh
+}
+
+case "$1" in
+  start)
+	do_start
+	exit 0
+	;;
+  stop)
+	do_stop
+	exit 2
+	;;
+  restart)
+	do_stop
+	do_start
+	exit 0
+	;;
+  *)
+	echo "Usage: $SCRIPTNAME {start|stop|restart}" >&2
+	exit 3
+	;;
+esac
+

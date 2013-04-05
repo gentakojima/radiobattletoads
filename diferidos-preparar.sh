@@ -15,9 +15,9 @@ AYER=$(date -d yesterday +%s)
 TRESAMHOY=$(date -d "today 3am" +%s)
 AHORA=$(date +%s)
 
-
 # Descargar URLS definidas en el calendario
-# y extraer metadatos
+# Extraer metadatos y enviárselos al servidor web
+
 $RBT_SCRIPTSDIR/interfaz-calendario.sh diferidos | while read LINE ; do
 	echo "Preparando $LINE"
 	HORAINICIO=$(echo $LINE | sed -r 's/^.+:::(.+):::.*$/\1/')
@@ -53,27 +53,16 @@ $RBT_SCRIPTSDIR/interfaz-calendario.sh diferidos | while read LINE ; do
 		if [ "a" == "a$EMISION" ] ; then 
 			EMISION=$(exiftool -Title "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3" | sed -E 's/^Title[ ]*: ('"$PROGRAMA"')?[ ,.:-]*(.*)[ ]*$/\2/')
 		fi
-		echo "$EMISION" > "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.episodio"
 		DURACION=$(mp3info -p %S "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3")
-		echo $DURACION > "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.duracion"
 		echo $URL > "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.url"
+		curl "http://$WEB_SERVER/api/calendario.php?update_diferido=1&key=$WEB_KEY&programa=$(urlencode $PROGRAMA_STRIPPED)&horainicio=$HORAINICIO&duracion=$DURACION&episodio=$(urlencode $EMISION)&url=$(urlencode $URL)"
 	fi
 done
 
 # Borrar cosas viejas
-find $RBT_DIFERIDOSDIR/ -iname '*.mp3' | while read p ; do
-	HORAINICIO=$(echo $p | sed -r 's/^.*-([0-9].+).mp3$/\1/')
-	if [ $(($HORAINICIO-$AYER)) -lt 0 ] ; then
-		EPISODIOFILE=$(echo $p | sed -r 's/^(.+)\.mp3$/\1.episodio/')
-		DURACIONFILE=$(echo $p | sed -r 's/^(.+)\.mp3$/\1.duracion/')
-		URLFILE=$(echo $p | sed -r 's/^(.+)\.mp3$/\1.url/')
-		rm "$p"
-		rm "$DURACIONFILE"
-		rm "$EPISODIOFILE"
-		rm "$URLFILE"
-		echo "Borrando archivo viejo $p"
-	fi
-done
+#find $RBT_DIFERIDOSDIR/ -iname '*.mp3' | while read p ; do
+#	echo "TODO"
+#done
 
 # Convertir los audios que haga falta conservando el tag titulo
 find $RBT_DIFERIDOSDIR/ -iname '*.mp3' | while read p ; do 

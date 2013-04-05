@@ -45,8 +45,6 @@ This is the code running the online radio Radio Battletoads
 
 == TODO ==
 
-  * Push recorded shows data to the webserver instead asking it from
-    calendar.php [ Should push-webserver.sh do this? ]
   * Remove wget dependency in favor of curl
   * Urgent cleanup: calendario.php
   * Restart recorded shows at the correct time instead of starting 
@@ -123,17 +121,13 @@ subdirectory inside it.
 Create these additional directories: "~/logs", "~/dumps-archive", "~/dumps", 
 "~/musica", "~/diferidos".
 
-OPTIONAL (but recommended): If you want the schedule to get the recorded
-programs duration and adapt the schedule accordingly, you must serve the
-"~/diferidos" directory through HTTP and configure it later on the web server.
-
 Copy the file "~/scripts/radiobattletoads.conf.dist" to "~/scripts/
 radiobattletoads.conf" and setup all the values. Everything is required.
 Don't try to continue without checking every single value because everything
 will fail.
 
-OPTIONAL: You might have noticed that you can change the directory locations on 
-the configuration file. That should work, but it is NOT tested by now. It will
+You might have noticed that you can change the directory locations on the 
+configuration file. That should work, but it is NOT tested by now. It will 
 probably make everything crash badly.
 
 
@@ -147,7 +141,7 @@ the /api directory. Creating the file and setting rw permissions to all users
 should do the trick.
 
 Create also the directory "api/cache" and set rwx permissions to the web server 
-user: "/api/cache"
+user.
 
 Copy the file "programas-en-emision.xml.dist" to "programas-en-emision.xml" and
 set up at least one program. For each program, you must:

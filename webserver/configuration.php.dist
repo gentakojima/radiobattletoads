@@ -9,11 +9,6 @@ $REFRESH_SECS=220;
  * EVER use it for anything */
 $GLOBAL_CALENDAR="";
 
-/* URL where the "~/diferidos" directory from the RADIO SERVER can be reached. This is
- * very optional, but recommended. Whithout this, the script can't get the recorded
- * actual duration, and will always use the duration specified on the calendar */
-$DIFERIDOS_URL="http://radio.example.com/diferidos";
-
 /* VLC server location for getting current song when playing music. This is optional,
  * but highly recommended */
 $VLC_SERVER="radio.example.com";

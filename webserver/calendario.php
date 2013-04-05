@@ -1,21 +1,21 @@
-<?php 
+<?php
 
 /*
- * This script reads all the Google Calendars defined on the file programas-en-emision.xml
- * into one, filtering out bad entries and checking that all the scheduled entries are 
- * within the permitted time frames.
- *
- * This code is an evolution of the oldest radio code from 2009. Don't expect it to be
- * pretty, readable or have any sense at all. 
- *
- * Heavy caching is used, and the calendar itself is only regenerated every $REFRESH_SECS
- * seconds. Since checking all these calendars can be very time consuming it's not 
- * recommended lowering this value too much. And for Cthulu's sake, DON'T set it to 0.
- * Even if you're debugging something, use higher values, as 30 or so.
- *
- * Hope you don't hate me too much after going through this.
- *
- */
+* This script reads all the Google Calendars defined on the file programas-en-emision.xml
+* into one, filtering out bad entries and checking that all the scheduled entries are
+* within the permitted time frames.
+*
+* This code is an evolution of the oldest radio code from 2009. Don't expect it to be
+* pretty, readable or have any sense at all.
+*
+* Heavy caching is used, and the calendar itself is only regenerated every $REFRESH_SECS
+* seconds. Since checking all these calendars can be very time consuming it's not
+* recommended lowering this value too much. And for Cthulu's sake, DON'T set it to 0.
+* Even if you're debugging something, use higher values, as 30 or so.
+*
+* Hope you don't hate me too much after going through this.
+*
+*/
 
 require('configuration.php');
 
@@ -25,24 +25,43 @@ $opciones["ahora"] = true;
 $opciones["calendario"] = true;
 if($_GET["ahora"]=="0") $opciones["ahora"] = false;
 if($_GET["calendario"]=="0") $opciones["calendario"] = false;
-f($_GET["update"]=="1"){
-    $opciones["update"] = true;
+if($_GET["update_song"]=="1"){
+    $opciones["update_song"] = true;
+    $opciones["update_diferido"] = false;
+    $opciones["ahora"] = false;
+    $opciones["calendario"] = false;
+    if($_GET["key"]!=$UPDATE_KEY) die("Bad key!");
+}
+if($_GET["update_diferido"]=="1"){
+    $opciones["update_song"] = false;
+    $opciones["update_diferido"] = true;
     $opciones["ahora"] = false;
     $opciones["calendario"] = false;
     if($_GET["key"]!=$UPDATE_KEY) die("Bad key!");
 }
 
 /* Modo update */
-if($opciones["update"]==true){
-    if($_GET["v"]) file_put_contents("cache/current_song",$_GET["v"]);
+if($opciones["update_song"]==true){
+    file_put_contents("cache/current_song",$_GET["v"]);
     if($_FILES["file"] && $_FILES["file"]["error"] == 0){
         if(!is_dir("cache/artwork")) mkdir("cache/artwork");
-        echo "uploading file";
-        echo move_uploaded_file($_FILES["file"]["tmp_name"],"cache/artwork/{$_FILES["file"]["name"]}.jpg");
+        move_uploaded_file($_FILES["file"]["tmp_name"],"cache/artwork/{$_FILES["file"]["name"]}.jpg");
     }
     $local_url = $_SERVER['DOCUMENT_ROOT']."/api/cache/artwork/{$_GET["v"]}.jpg";
     if(file_exists($local_url)) die("ok");
     else die("needs_artwork");
+}
+if($opciones["update_diferido"]==true){
+    if($_GET["programa"]!="" && $_GET["horainicio"]!=""){
+        if(!is_dir("cache/info")) mkdir("cache/info");
+        if($_GET["duracion"]!="") file_put_contents("cache/info/{$_GET["programa"]}-{$_GET["horainicio"]}.duracion",$_GET["duracion"]);
+        if($_GET["episodio"]!="") file_put_contents("cache/info/{$_GET["programa"]}-{$_GET["horainicio"]}.episodio",$_GET["episodio"]);
+        if($_GET["url"]!="") file_put_contents("cache/info/{$_GET["programa"]}-{$_GET["horainicio"]}.url",$_GET["url"]);
+    }
+    else{
+        die("must_specify_programa_and_horainicio");
+    }
+    die("ok");
 }
 
 /* Medir rendimiento */
@@ -52,7 +71,7 @@ $performance_starttime = $performance_starttime[1] + $performance_starttime[0];
 
 /* Obtener programas y sus calendarios */
 
-$programas_xml = new DOMDocument(); 
+$programas_xml = new DOMDocument();
 $programas_xml->load('programas-en-emision.xml');
  
 $emisiones_xml = $programas_xml->getElementsByTagName('emision');
@@ -63,11 +82,11 @@ foreach($emisiones_xml as $emision_xml){
         $programa['nombre'] = $emision_xml->getElementsByTagName('nombre')->item(0)->nodeValue;
         $programa['calendario'] = $emision_xml->getElementsByTagName('calendario')->item(0)->nodeValue;
         $programa['icono'] = $emision_xml->getElementsByTagName('icono')->item(0)->nodeValue;
-	$programa['twitter'] = $emision_xml->getElementsByTagName('twitter')->item(0)->nodeValue;
-	$programa['chat'] = $emision_xml->getElementsByTagName('chat')->item(0)->nodeValue;
-	$programa['descripcion'] = $emision_xml->getElementsByTagName('descripcion')->item(0)->nodeValue;
-	$programa['web'] = $emision_xml->getElementsByTagName('web')->item(0)->nodeValue;
-	$programa['horarios'] = $emision_xml->getElementsByTagName('horario');
+        $programa['twitter'] = $emision_xml->getElementsByTagName('twitter')->item(0)->nodeValue;
+        $programa['chat'] = $emision_xml->getElementsByTagName('chat')->item(0)->nodeValue;
+        $programa['descripcion'] = $emision_xml->getElementsByTagName('descripcion')->item(0)->nodeValue;
+        $programa['web'] = $emision_xml->getElementsByTagName('web')->item(0)->nodeValue;
+        $programa['horarios'] = $emision_xml->getElementsByTagName('horario');
         if($programa['calendario']!=null) $programas[]=$programa;
 
 }
@@ -79,8 +98,8 @@ $cachefile_secondsold = date('U')-date('U', filectime($cachefile));
 $lockfile_exists = file_exists($lockfile);
 if($lockfile_exists===true) $lockfile_secondsold = date('U')-date('U', filectime($lockfile));
 
-if( $cachefile_secondsold>$REFRESH_SECS && 
-    (($lockfile_exists==true && $lockfile_secondsold>$REFRESH_SECS) || ($lockfile_exists==false)) 
+if( $cachefile_secondsold>$REFRESH_SECS &&
+    (($lockfile_exists==true && $lockfile_secondsold>$REFRESH_SECS) || ($lockfile_exists==false))
   ){
 
         /* Crear archivo de bloqueo */
@@ -96,7 +115,7 @@ if( $cachefile_secondsold>$REFRESH_SECS &&
 
         // Descargar el calendario global
 
-	$calendar_suffix = '?orderby=starttime&sortorder=ascending&ctz=Europe/Madrid&start-min='.urlencode(date(DATE_ATOM,time()-57600)).'&start-max='.urlencode(date(DATE_ATOM,time()+1036800));
+$calendar_suffix = '?orderby=starttime&sortorder=ascending&ctz=Europe/Madrid&start-min='.urlencode(date(DATE_ATOM,time()-57600)).'&start-max='.urlencode(date(DATE_ATOM,time()+1036800));
         $feed = "$GLOBAL_CALENDAR{$calendar_suffix}";
         $cachefile = 'cache/calendario_global';
         $feedcontents = @file_get_contents($feed);
@@ -128,7 +147,7 @@ if( $cachefile_secondsold>$REFRESH_SECS &&
                         $node->getElementsByTagName('title')->item(0)->appendChild(new DOMText("{$programa['nombre']}:::{$texto_original}"));
                         
                         /* Comprobar si cumple horarios */
-                        $times = $node->getElementsByTagName( 'when' ); 
+                        $times = $node->getElementsByTagName( 'when' );
                         $startTime = $times->item(0)->getAttributeNode('startTime')->value;
                         $endTime = $times->item(0)->getAttributeNode('endTime')->value;
                         $horarioprograma['inicio_timestamp'] = strtotime( $startTime );
@@ -176,8 +195,8 @@ if( $cachefile_secondsold>$REFRESH_SECS &&
                         else{
                                 /* Recopila razones del rechazo */
                                 $inicioalas = date('Y-m-d G:i',$horarioprograma['inicio_timestamp']);
-                                $razones_string=implode("\n  - ",$razones);
-                                $rejected_entries.="\n * {$programa['nombre']} {$texto_original} @($inicioalas)\n  - {$razones_string}";
+                                $razones_string=implode("\n - ",$razones);
+                                $rejected_entries.="\n * {$programa['nombre']} {$texto_original} @($inicioalas)\n - {$razones_string}";
                         }
                 }
                 
@@ -194,20 +213,20 @@ if( $cachefile_secondsold>$REFRESH_SECS &&
 }
 
 /* Generar la salida */
-$doc_xml = new DOMDocument(); 
+$doc_xml = new DOMDocument();
 $doc_xml->load('cache/calendario_output');
-$entries_xml = $doc_xml->getElementsByTagName('entry'); 
+$entries_xml = $doc_xml->getElementsByTagName('entry');
 
 $runningShow=null;
 
 $emisiones = array();
-foreach ( $entries_xml as $entry_xml ) { 
+foreach ( $entries_xml as $entry_xml ) {
 
         $emision=array();
         // Hora hoy
         $emision['horahoy'] = strtotime('today 00:00:00');
 
-        $status = $entry_xml->getElementsByTagName( 'eventStatus' ); 
+        $status = $entry_xml->getElementsByTagName( 'eventStatus' );
         $eventStatus = $status->item(0)->getAttributeNode('value')->value;
 
         if ($eventStatus == 'http://schemas.google.com/g/2005#event.confirmed') {
@@ -226,7 +245,7 @@ foreach ( $entries_xml as $entry_xml ) {
                 if($emision['tipo']!='directo' && $emision['tipo']!='diferido') continue;
                 
                 // Hora inicio
-                $times = $entry_xml->getElementsByTagName( 'when' ); 
+                $times = $entry_xml->getElementsByTagName( 'when' );
                 $startTime = $times->item(0)->getAttributeNode('startTime')->value;
                 $emision['horainicio'] = strtotime( $startTime );
                 
@@ -241,56 +260,35 @@ foreach ( $entries_xml as $entry_xml ) {
                 $emision['programa_saneado'] = preg_replace('/[^abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ]/','',$emision['programa']);
                 // Autocompleta títulos de episodios en diferido sin título con los metadatos del MP3
                 if($emision['tipo']=='diferido' && strlen($emision['episodio'])==0){
-                        if($emision['horainicio']-$emision['horahoy']<=86400 || $emision['urlDescarga']!=''){
-                                $local_url='cache/info/'."{$emision['programa_saneado']}-{$emision['horainicio']}".'.episodio';
-                                // Los descarga de nuevo cada 30 minutos o si no existen en el server aun
-                                if(file_exists($local_url) && (date('U')-date('U', filectime($local_url)))<2000 ){
-                                        $emision['episodio'] = trim(file_get_contents($local_url));
-                                }
-                                else{
-                                        $external_url=$DIFERIDOS_URL."/".rawurlencode("{$emision['programa_saneado']}-{$emision['horainicio']}").'.episodio';
-                                        if(get_http_response_code($external_url)!='404'){
-                                                $emision['episodio'] = trim(file_get_contents($external_url));
-                                                $emision['episodio'] = mb_convert_encoding($emision['episodio'], "UTF-8", "auto");
-                                                file_put_contents("cache/info/{$emision['programa_saneado']}-{$emision['horainicio']}.episodio",$emision['episodio']);
-                                        }
-                                }
-                        }
-                        else{
-                                $emision['episodio'] = '(episodio más reciente)';
+                        $emision['episodio'] = '(episodio más reciente)';
+                        $episodiofile='cache/info/'."{$emision['programa_saneado']}-{$emision['horainicio']}".'.episodio';
+                        if(file_exists($episodiofile)){
+                                $emision['episodio'] = trim(file_get_contents($episodiofile));
                         }
                 }
                 
                 // Obtiene la duración real de episodios en diferido de los datos del MP3
                 if($emision['tipo']=='diferido'){
-			$duracion=0;
-                        $local_url='cache/info/'."{$emision['programa_saneado']}-{$emision['horainicio']}".'.duracion';
-                        // Los descarga de nuevo cada 10 minutos o si no existen en el server aun
-                        if(file_exists($local_url) && (date('U')-date('U', filectime($local_url)))<600 ){
-                                $duracion = file_get_contents($local_url);
-                        }
-                        else{
-                                $external_url=$DIFERIDOS_URL."/".rawurlencode("{$emision['programa_saneado']}-{$emision['horainicio']}").'.duracion';
-                                if(get_http_response_code($external_url)!='404'){
-                                        $duracion = trim(file_get_contents($external_url));
-                                        file_put_contents("cache/info/{$emision['programa_saneado']}-{$emision['horainicio']}.duracion",$duracion);
-                                }
-                        }
-                        $emision["horafinOriginal"]=$emision["horafin"];
-                        // Añade 60 segundos por seguridad, sino puede que corte el programa antes de tiempo
-                        if($duracion>0) $emision["horafin"]=$emision["horainicio"]+$duracion+60;
+                        $duracion=$emision['horafin']-$emision['horainicio'];
+                        $duracionfile='cache/info/'."{$emision['programa_saneado']}-{$emision['horainicio']}".'.duracion';
+                        if(file_exists($duracionfile)){
+                                $duracion = file_get_contents($duracionfile);
+                                $emision["horafinOriginal"]=$emision["horafin"];
+                                // Añade 60 segundos por seguridad, sino puede que corte el programa antes de tiempo
+                                if($duracion>0) $emision["horafin"]=$emision["horainicio"]+$duracion+60;
+                        }                
                 }
                 
                 // Busca icono, twitter y chat
                 foreach($programas as $p){
                         if($p['nombre']==$emision['programa']){
                                 $emision['icono'] = $p['icono'];
-				$emision['twitter'] = $p['twitter'];
-				$emision['chat'] = $p['chat'];
-				$emision['web'] = $p['web'];
-				$emision['descripcion'] = $p['descripcion'];
-				break 1;
-			} 
+                                $emision['twitter'] = $p['twitter'];
+                                $emision['chat'] = $p['chat'];
+                                $emision['web'] = $p['web'];
+                                $emision['descripcion'] = $p['descripcion'];
+                                break 1;
+                        }
                 }
                 
                 // Variables que dicen si ha empezado, etc.
@@ -298,8 +296,8 @@ foreach ( $entries_xml as $entry_xml ) {
                 $hasEnded = ((time()) < $emision['horafin'])?false:true;
                 if($hasEnded===false && $hasStarted===true) $isRunning=true;
                 else $isRunning=false;
-		$isFromThePast = (($emision['horafin'] - (time()-86400))>0)?false:true;
-
+                
+                $isFromThePast = (($emision['horafin'] - (time()-86400))>0)?false:true;
                 // Si ya es viejo, adios
                 if($isFromThePast===true) continue;
                 
@@ -325,7 +323,7 @@ if($opciones["ahora"]==true){
         $now["episodio"] = $track;
         $local_url = $_SERVER['DOCUMENT_ROOT']."/api/cache/artwork/{$track}.jpg";
         if(file_exists($local_url)){
-            $now['icono'] = "http://$WEB_SERVER/api/cache/artwork/{$track}.jpg";
+            $now['icono'] = "http://$WEB_SERVER/api/cache/artwork/".str_replace("?","%3F",$track).".jpg";
         }
         else{
             $now['icono'] = $ICON_MUSICA;
@@ -334,6 +332,7 @@ if($opciones["ahora"]==true){
         $now['chat']='';
     }
 }
+
 
 /* Funciones apoyo */
 function get_http_response_code($theURL) {
@@ -346,7 +345,7 @@ $performance_mtime = explode(' ', microtime());
 $performance_totaltime = $performance_mtime[0] + $performance_mtime[1] - $performance_starttime;
 
 /* Salida */
-if($_GET["formato"]=="ical"){ 
+if($_GET["formato"]=="ical"){
 header('Content-type: text/calendar; charset=utf-8');
 ini_set("date.timezone","Europe/Madrid");
 ?>
@@ -386,43 +385,42 @@ header('Content-type: text/xml; charset=utf-8');
 echo '<?xml version="1.0" ?>'; ?>
 <root>
 <?php if($opciones["ahora"]==true): ?>
-        <ahora>
-                <programa><?=$now['programa']?></programa>
-                <episodio><![CDATA[<?=$now['episodio']?>]]></episodio>
-                <icono><?=$now['icono']?></icono>    
-                <tipo><?=$now['tipo']?></tipo>
-                <horainicio><?=$now['horainicio']?></horainicio>
-                <horafin><?=$now['horafin']?></horafin>
-                <horafinOriginal><?=$now['horafinOriginal']?></horafinOriginal>
-		<twitter><?=$now['twitter']?></twitter>
-		<chat><?=$now['chat']?></chat>
-		<urlDescarga><?=$now['urlDescarga']?></urlDescarga>
-        </ahora>
+<ahora>
+<programa><?=$now['programa']?></programa>
+<episodio><![CDATA[<?=$now['episodio']?>]]></episodio>
+<icono><?=$now['icono']?></icono>
+<tipo><?=$now['tipo']?></tipo>
+<horainicio><?=$now['horainicio']?></horainicio>
+<horafin><?=$now['horafin']?></horafin>
+<horafinOriginal><?=$now['horafinOriginal']?></horafinOriginal>
+<twitter><?=$now['twitter']?></twitter>
+<chat><?=$now['chat']?></chat>
+<urlDescarga><?=$now['urlDescarga']?></urlDescarga>
+</ahora>
 <?php endif; ?>
 <?php if($opciones["calendario"]==true): ?>
-        <calendario>
-        <? foreach($emisiones as $emision): ?>
-               	<emision>
-                        <programa><?=$emision['programa']?></programa>
-                        <episodio><![CDATA[<?=$emision['episodio']?>]]></episodio>
-                        <horainicio><?=$emision['horainicio']?></horainicio>
-                        <horafin><?=$emision['horafin']?></horafin>
-                        <horafinOriginal><?=$emision['horafinOriginal']?></horafinOriginal>
-                        <tipo><?=$emision['tipo']?></tipo>
-			<descripcion><?=$emision['descripcion']?></descripcion>
-			<twitter><?=$emision['twitter']?></twitter>
-			<chat><?=$emision['chat']?></chat>
-			<web><?=$emision['web']?></web>
-			<urlDescarga><?=$emision['urlDescarga']?></urlDescarga>
-        	</emision>
-        <? endforeach; ?>
-        </calendario>
+<calendario>
+<? foreach($emisiones as $emision): ?>
+<emision>
+<programa><?=$emision['programa']?></programa>
+<episodio><![CDATA[<?=$emision['episodio']?>]]></episodio>
+<horainicio><?=$emision['horainicio']?></horainicio>
+<horafin><?=$emision['horafin']?></horafin>
+<horafinOriginal><?=$emision['horafinOriginal']?></horafinOriginal>
+<tipo><?=$emision['tipo']?></tipo>
+<descripcion><?=$emision['descripcion']?></descripcion>
+<twitter><?=$emision['twitter']?></twitter>
+<chat><?=$emision['chat']?></chat>
+<web><?=$emision['web']?></web>
+<urlDescarga><?=$emision['urlDescarga']?></urlDescarga>
+</emision>
+<? endforeach; ?>
+</calendario>
 <?php endif; ?>
-        <debug>
-                <cachetime><?=$cachefile_secondsold?></cachetime>
-                <gentime><?=$performance_totaltime?></gentime>
-                <time><?=time()?></time>
-        </debug>
+<debug>
+<cachetime><?=$cachefile_secondsold?></cachetime>
+<gentime><?=$performance_totaltime?></gentime>
+<time><?=time()?></time>
+</debug>
 </root>
 <? } ?>
-
