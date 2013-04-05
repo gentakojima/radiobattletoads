@@ -47,8 +47,6 @@ This is the code running the online radio Radio Battletoads
   * Urgent cleanup: calendario.php
   * Restart recorded shows at the correct time instead of starting 
     over again
-  * Move the control radio logic to a daemon (in the same fashion as
-    push-webserver.sh) instead of relying on cronjobs.
   * General cleanup
 
 == ARCHITECTURE ==
