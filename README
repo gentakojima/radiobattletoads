@@ -26,10 +26,8 @@ This is the code running the online radio Radio Battletoads
 
 == KNOWN ISSUES AND LIMITATIONS ==
 
-  * Actions can only be taken only once in a minute, and the scheduler takes
-    several seconds to run, so every scheduled show might start between 1
-    and 2 minutes later. This is important for live shows. [ There are plans
-    to fix this ]
+  * The scheduler takes several seconds to run, so every scheduled show might
+    start up to 1 minute later than expected. This is important for live shows.
   * The generated calendar is cached, so changes to a Googler Calendar won't be
     instantly reflected on the generated calendar (takes up to 3.5 minutes by 
     default for changes to take effect)
