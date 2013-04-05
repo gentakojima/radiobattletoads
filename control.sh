@@ -21,7 +21,7 @@ echo "Obteniendo información:"
 
 echo -n "Descargando info del VLC del programa actual: "
 PROGRAMA_EN_EMISION=$($RBT_SCRIPTSDIR/interfaz-vlc.sh current programa)
-PROGRAMA_EN_EMISION_DIFERIDO_HORAINICIO=$($RBT_SCRIPTSDIR/interfaz-vlc.sh current url | grep 'file:///home/radiobattletoads/diferidos/' | sed -r 's/file:\/\/\/home\/radiobattletoads\/diferidos\/.+-([0-9]+).mp3/\1/')
+PROGRAMA_EN_EMISION_DIFERIDO_HORAINICIO=$($RBT_SCRIPTSDIR/interfaz-vlc.sh current url | grep "file://$RBT_DIFERIDOSDIR/" | sed -r 's/file:\/\/$(add_slashes $RBT_DIFERIDOSDIR)\/.+-([0-9]+).mp3/\1/')
 echo "[OK]"
 
 echo -n "Descargando info del calendario del programa que debería emitirse: "

@@ -34,3 +34,6 @@ function urldecode(){
 	echo "$(printf %b "${1//%/\x}")"
 }
 
+function add_slashes(){
+	echo $1 | sed -r 's/\//\\\//g'
+}
