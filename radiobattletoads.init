@@ -14,11 +14,13 @@
 do_start()
 {
 	nohup /home/radiobattletoads/scripts/push-webserver.sh 0<&- &>/dev/null &
+	nohup /home/radiobattletoads/scripts/control.sh 0<&- &>/dev/null &
 }
 
 do_stop()
 {
 	killall push-webserver.sh
+	killall control.sh
 }
 
 case "$1" in

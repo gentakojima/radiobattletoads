@@ -17,6 +17,8 @@ if [ "a$BREAK_THE_RECURSION" == "a" ] && [ $(ps aux | grep control.sh | grep -v 
 	exit 1
 fi
 
+while true ; do
+
 echo "Obteniendo información:"
 
 echo -n "Descargando info del VLC del programa actual: "
@@ -245,4 +247,5 @@ for p in ${ACCIONES[@]} ; do
 	esac
 done
 
-
+sleep 5
+done # end while true

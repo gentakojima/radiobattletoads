@@ -87,7 +87,7 @@ your skills with the technologies involved. I've divided it into 5 steps:
    2. Installation of the web server
    3. Validation of the web server
    4. Initial setup of the streaming server
-   5. Contrab rules everything
+   5. Setup daemons and cronjobs
 
 
 STEP 1. INSTALLATION OF STREAMING SERVER
@@ -198,30 +198,26 @@ If you can't see anything, you must fix that before continuing.
 
 Run the control script to see if everything behaves OK: Issue "~/scripts/
 control.sh" several times at different situations and check that the radio is 
-putting and removing the programs on schedule.
+putting and removing the programs on schedule. 
 
 
-STEP 5. CRONTAB RULES (ALMOST) EVERYTHING
+STEP 5. SETUP DAEMONS AND CRONJOBS
 
-All the scripts you've been running on the initial run, need to be run again
-with different paces. You must setup cronjobs to do this.
+The control script "~/scripts/control.sh" and the script that pushes the
+songs information to the webserver "~/scripts/push-webserver.sh" should be
+running in background all the time.
 
-A sample cronjob file is included on the file "crontab.example", but feel
-free to adjust the times following your own needs.
+A sampe initscript, "radiobattletoads.init" is provided. Copy it into "/etc/
+init.d/radiobattletoads", enable it by issuing as root "update-rc.d
+radiobattletoads defaults".
+
+Other jobs must be run at difference paces, and you must setup cronjobs. A
+sample cronjob file is included on the file "crontab.example", but feel free
+ to adjust the times following your own needs.
 
 The logs will tell you the commands runned, and the actions taken. Continue
 looking at these logs for a while after the initial setup to check that
 everything runs as expected.
-
-There's an exception: the information about the songs playing is pushed by
-a daemon to the webserver. This is where were are going, it's not just a
-random oddity. It's planned to move from cronjob-based radio control to a
-daemon-based approach in the future.
-
-This daemon, "~/scripts/push-webserver.sh" has to be run from the init. A
-sampe initscript, "radiobattletoads.init" is provided. Copy it into "/etc/
-init.d/radiobattletoads", enable it by issuing as root "update-rc.d 
-radiobattletoads defaults".
 
 == ISSUES ==
 
