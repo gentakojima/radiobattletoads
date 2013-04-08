@@ -19,11 +19,25 @@ fi
 
 while true ; do
 
+# Clean variables
+unset nombre_programa
+unset nombreprograma_limpio
+unset p
+unset PROGRAMA_EN_EMISION
+unset PROGRAMA_EN_EMISION_DIFERIDO_HORAINICIO
+unset PROGRAMA_QUE_DEBERIA_EMITIRSE
+unset PROGRAMA_QUE_DEBERIA_EMITIRSE_EPISODIO
+unset PROGRAMA_QUE_DEBERIA_EMITIRSE_HORAFIN
+unset PROGRAMA_QUE_DEBERIA_EMITIRSE_HORAINICIO
+unset PROGRAMA_QUE_DEBERIA_EMITIRSE_INFOCOMPLETA
+unset PROGRAMA_QUE_DEBERIA_EMITIRSE_TIPO
+unset PROGRAMA_QUE_DEBERIA_EMITIRSE_TWITTER
+
 echo "Obteniendo información:"
 
 echo -n "Descargando info del VLC del programa actual: "
 PROGRAMA_EN_EMISION=$($RBT_SCRIPTSDIR/interfaz-vlc.sh current programa)
-PROGRAMA_EN_EMISION_DIFERIDO_HORAINICIO=$($RBT_SCRIPTSDIR/interfaz-vlc.sh current url | grep "file://$RBT_DIFERIDOSDIR/" | sed -r 's/file:\/\/$(add_slashes $RBT_DIFERIDOSDIR)\/.+-([0-9]+).mp3/\1/')
+PROGRAMA_EN_EMISION_DIFERIDO_HORAINICIO=$($RBT_SCRIPTSDIR/interfaz-vlc.sh current url | grep "file://$RBT_DIFERIDOSDIR/" | sed -r 's/file:\/\/'"$(add_slashes $RBT_DIFERIDOSDIR)"'\/.+-([0-9]+).mp3/\1/')
 echo "[OK]"
 
 echo -n "Descargando info del calendario del programa que debería emitirse: "
