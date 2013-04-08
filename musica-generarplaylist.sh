@@ -23,15 +23,27 @@ while read line; do
 	fi
 done < <(echo "$CANCIONES")
 
-NUMCUNHAS=${#CUNHAS_A[@]};
-
-j=1
-for ((i=0; i<${#CANCIONES_A[@]}; i++)); do
-	j=$(($j+1))
-	if [ $j -eq 2 ] ; then
-		echo ${CUNHAS_A[$(($RANDOM%$NUMCUNHAS))]} >> "$RBT_MUSICADIR/playlist.m3u"
-		j=0
-	fi
-	echo ${CANCIONES_A[i]} >> "$RBT_MUSICADIR/playlist.m3u"
+while [ ${#CUNHAS_A[@]} -lt ${#CANCIONES_A[@]} ] ; do
+	CUNHAS_A=("${CUNHAS_A[@]}" "${CUNHAS_A[@]}")
 done
+
+if [ $JINGLE_EVERY -gt 0 ] ; then
+	# Jingles are on
+	j=$(($JINGLE_EVERY-1))
+	i=0
+	for ((i=0; i<${#CANCIONES_A[@]}; i++)); do
+		j=$(($j+1))
+		if [ $j -eq $JINGLE_EVERY ] ; then
+			echo ${CUNHAS_A[$i]} >> "$RBT_MUSICADIR/playlist.m3u"
+			j=0
+			i=$(($i+1))
+		fi
+		echo ${CANCIONES_A[i]} >> "$RBT_MUSICADIR/playlist.m3u"
+	done
+else
+	# Jingles are off
+	for ((i=0; i<${#CANCIONES_A[@]}; i++)); do
+		echo ${CANCIONES_A[i]} >> "$RBT_MUSICADIR/playlist.m3u"
+	done
+fi
 
