@@ -40,7 +40,7 @@ fi
 
 logcommand $0 $@
 
-WGETCMD="wget --timeout 20 --retries 2 -O /dev/null --quiet"
+WGETCMD="wget --timeout=20 --tries=2 -O /dev/null --quiet"
 
 case $COMANDO in
 	next)
