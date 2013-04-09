@@ -40,7 +40,7 @@ fi
 
 logcommand $0 $@
 
-WGETCMD="wget -O /dev/null --quiet"
+WGETCMD="wget --timeout 20 --retries 2 -O /dev/null --quiet"
 
 case $COMANDO in
 	next)
@@ -157,6 +157,9 @@ case $COMANDO in
 			;;
 			programa)
 				wget --quiet -O /tmp/vlc_playlist $URL_PLAYLIST
+				if [ $? -ne 0 ] ; then
+					exit 1
+				fi
 		                LINE=`cat /tmp/vlc_playlist | grep "<leaf" | grep current`
 				URL=$(echo $LINE |sed -r 's/.*uri=\"([^"]+)\".*/\1/')
 				OUTPUT=$($RBT_SCRIPTSDIR/interfaz-calendario.sh nombre "$URL")

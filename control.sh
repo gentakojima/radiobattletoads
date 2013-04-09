@@ -37,6 +37,13 @@ echo "Obteniendo información:"
 
 echo -n "Descargando info del VLC del programa actual: "
 PROGRAMA_EN_EMISION=$($RBT_SCRIPTSDIR/interfaz-vlc.sh current programa)
+if [ $? -eq 1 ] ; then
+        echo "[FAIL] Retrying after 20 seconds..."
+        sleep 20
+        continue
+else
+        echo "[OK]"
+fi
 PROGRAMA_EN_EMISION_DIFERIDO_HORAINICIO=$($RBT_SCRIPTSDIR/interfaz-vlc.sh current url | grep "file://$RBT_DIFERIDOSDIR/" | sed -r 's/file:\/\/'"$(add_slashes $RBT_DIFERIDOSDIR)"'\/.+-([0-9]+).mp3/\1/')
 echo "[OK]"
 
