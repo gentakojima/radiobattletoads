@@ -19,6 +19,8 @@ function showok(){
 	fi
 }
 
+WGETCMD="wget -O /dev/null --quiet"
+
 if [ -z "$COMANDO" ] ; then
 	echo "Uso: interfaz-calendario.sh COMANDO [ARGUMENTO]"
 	echo " nombre URL	Busca un programa por URL de stream"
@@ -53,7 +55,10 @@ case $COMANDO in
 		else
 			# Directo
 			MODO=""
-			wget --quiet -O /tmp/programas $URL_PROGRAMAS
+			wget --timeout 20 --tries=2 --quiet -O /tmp/programas $URL_PROGRAMAS
+			if [ $? -ne 0 ] ; then
+				exit 1
+			fi
 			cat /tmp/programas | while read LINE ; do
 				if [ "a$MODO" == "acomparar" ] ; then MODO="" ; fi
 				echo $LINE | grep "<emision>" > /dev/null && MODO="leer"
@@ -88,7 +93,10 @@ case $COMANDO in
 	stream|podcast|twitter)
 		OUTPUT=""
                 MODO=""
-                wget --quiet -O /tmp/programas $URL_PROGRAMAS
+                wget  --timeout 20 --tries=2 --quiet -O /tmp/programas $URL_PROGRAMAS
+		if [ $? -ne 0 ] ; then
+			exit 1
+		fi
                 cat /tmp/programas | while read LINE ; do
                         if [ "a$MODO" == "acomparar" ] ; then MODO="" ; fi
                         echo $LINE | grep "<emision>" > /dev/null && MODO="leer"
@@ -118,7 +126,10 @@ case $COMANDO in
                 done
 	;;
 	list)
-                wget --quiet -O /tmp/programas $URL_PROGRAMAS
+                wget  --timeout 20 --tries=2 --quiet -O /tmp/programas $URL_PROGRAMAS
+		if [ $? -ne 0 ] ; then
+			exit 1
+		fi
                 cat /tmp/programas | while read LINE ; do
                 	echo $LINE | grep "<nombre>" > /dev/null
                         if [ $? -eq 0 ] ; then 
@@ -127,7 +138,10 @@ case $COMANDO in
 		done
 	;;
 	diferidos)
-	wget --quiet -O /tmp/calendario $URL_CALENDARIO
+		wget --timeout 20 --tries=2  --quiet -O /tmp/calendario $URL_CALENDARIO
+		if [ $? -ne 0 ] ; then
+                        exit 1
+                fi
                 cat /tmp/calendario | while read LINE ; do
 
 			if [ "a$MODO" == "asalida" ] ; then MODO="" ; fi
@@ -169,12 +183,15 @@ case $COMANDO in
                 done
 	;;
 	ahora)
-	CURRENT_PROGRAMA=""
-	CURRENT_EPISODIO=""
-	CURRENT_HORAINICIO=""
-	CURRENT_HORAFIN=""
-	CURRENT_TIPO=""
-        wget --quiet -O /tmp/calendario $URL_CALENDARIO
+		CURRENT_PROGRAMA=""
+		CURRENT_EPISODIO=""
+		CURRENT_HORAINICIO=""
+		CURRENT_HORAFIN=""
+		CURRENT_TIPO=""
+       		wget --timeout 20 --tries=2  --quiet -O /tmp/calendario $URL_CALENDARIO
+		if [ $? -ne 0 ] ; then
+			exit 1
+		fi
                 cat /tmp/calendario | while read LINE ; do
                         if [ "a$MODO" == "asalida" ] ; then MODO="" ; fi
                         echo $LINE | grep "<ahora>" > /dev/null && MODO="leer"

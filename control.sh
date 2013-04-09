@@ -42,7 +42,13 @@ echo "[OK]"
 
 echo -n "Descargando info del calendario del programa que debería emitirse: "
 PROGRAMA_QUE_DEBERIA_EMITIRSE_INFOCOMPLETA=$($RBT_SCRIPTSDIR/interfaz-calendario.sh ahora)
-echo "[OK]"
+if [ $? -eq 1 ] ; then
+	echo "[FAIL] Retrying after 20 seconds..."
+	sleep 20
+	continue
+else
+	echo "[OK]"
+fi
 PROGRAMA_QUE_DEBERIA_EMITIRSE=$(echo $PROGRAMA_QUE_DEBERIA_EMITIRSE_INFOCOMPLETA | sed -r 's/(.+):::.*:::.*:::.*:::.*/\1/')
 PROGRAMA_QUE_DEBERIA_EMITIRSE_HORAINICIO=$(echo $PROGRAMA_QUE_DEBERIA_EMITIRSE_INFOCOMPLETA | sed -r 's/.+:::.*:::.*:::(.*):::.*/\1/')
 PROGRAMA_QUE_DEBERIA_EMITIRSE_HORAFIN=$(echo $PROGRAMA_QUE_DEBERIA_EMITIRSE_INFOCOMPLETA | sed -r 's/.+:::.*:::.*:::.*:::(.*)/\1/')
