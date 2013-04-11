@@ -38,11 +38,9 @@ $RBT_SCRIPTSDIR/interfaz-calendario.sh diferidos | while read LINE ; do
 				DESCARGADO="true"
 			else
 				echo " - No haciendo nada porque ya está preparado"
-	                        DESCARGADO="false"
 			fi
 		else
 			echo " - No haciendo nada porque es un podcast y falta mucho"
-			DESCARGADO="false"
 		fi
 	fi
 	if [ "a$DESCARGADO" == "atrue" ] ; then

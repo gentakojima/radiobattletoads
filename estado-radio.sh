@@ -19,7 +19,7 @@ source $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/support_functions.sh
 REINICIAR="FALSE"
 
 OUTPUTFILE="/tmp/comprobacion_stream_$RANDOM"
-LOGFILE="$OUTPUTFILE_log"
+RBTLOGFILE="${OUTPUTFILE}_log"
 
 echo -ne "Comprobando Icecast... "
 PAGINA_ICECAST=$(timeout 30 wget http://$ICECAST2_SERVER:$ICECAST2_PORT/ -O - 2>/dev/null)
@@ -30,12 +30,12 @@ else
 fi
 
 echo -ne "Comprobando Stream... "
-timeout 15 wget -t 1 -T 8 http://$ICECAST2_SERVER:$ICECAST2_PORT/$ICECAST2_MOUNT -O $OUTPUTFILE -o $LOGFILE
+timeout 15 wget -t 1 -T 8 http://$ICECAST2_SERVER:$ICECAST2_PORT/$ICECAST2_MOUNT -O $OUTPUTFILE -o $RBTLOGFILE
 grep "timed out" /tmp/comprobacion_stream_log
 if [ $? -eq 0 ] ; then
 	logcommand $0 estado-radio "Detectado timeout por primera vez. Volviendo a probar."
-	timeout 15 wget -t 1 -T 13 http://$ICECAST2_SERVER:$ICECAST2_PORT/$ICECAST2_MOUNT -O $OUTPUTFILE.2 -o $LOGFILE.2
-	grep "timed out" $LOGFILE.2
+	timeout 15 wget -t 1 -T 13 http://$ICECAST2_SERVER:$ICECAST2_PORT/$ICECAST2_MOUNT -O $OUTPUTFILE.2 -o $RBTLOGFILE.2
+	grep "timed out" $RBTLOGFILE.2
 	if [ $? -eq 0 ] ; then
 		logcommand $0 estado-radio "Detectado timeout por segunda vez. Reiniciando la radio."
 		echo "[FALLO]"
