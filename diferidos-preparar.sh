@@ -53,7 +53,7 @@ $RBT_SCRIPTSDIR/interfaz-calendario.sh diferidos | while read LINE ; do
 		fi
 		DURACION=$(mp3info -p %S "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3")
 		echo $URL > "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.url"
-		curl "http://$WEB_SERVER/api/calendario.php?update_diferido=1&key=$WEB_KEY&programa=$(urlencode $PROGRAMA_STRIPPED)&horainicio=$HORAINICIO&duracion=$DURACION&episodio=$(urlencode $EMISION)&url=$(urlencode $URL)"
+		curl "http://$WEB_SERVER/api/calendario.php?update_diferido=1&key=$WEB_KEY&programa=$(urlencode "$PROGRAMA_STRIPPED")&horainicio=$HORAINICIO&duracion=$DURACION&episodio=$(urlencode "$EMISION")&url=$(urlencode "$URL")"
 	fi
 done
 
