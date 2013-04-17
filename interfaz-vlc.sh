@@ -35,6 +35,7 @@ if [ -z "$COMANDO" ] ; then
 	echo " run	Ejecuta el VLC"
 	echo " restart	Mata a todo VLC viviente y vuelve a ejecutarlo"
 	echo " current id|name|url|programa|artist-track|artwork Show current track information"
+	echo " seekto seconds	Seek player to the given seconds"
 	exit 1
 fi
 
@@ -43,6 +44,11 @@ logcommand $0 $@
 WGETCMD="wget --timeout=20 --tries=2 -O /dev/null --quiet"
 
 case $COMANDO in
+	seekto)
+		echo -ne "Seeking to $ARGUMENTO..."
+		$WGETCMD "$URL_STATUS?command=seek&val=$ARGUMENTO"
+		showok $?
+	;;
 	next)
 		echo -ne "Siguiente..."
 		$WGETCMD "$URL_STATUS?command=pl_next"

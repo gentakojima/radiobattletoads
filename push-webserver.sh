@@ -13,6 +13,8 @@ NOT_UPDATED_TIMES=0
 
 while true ; do
 
+	date
+
 	TRACKNAME="$($RBT_SCRIPTSDIR/interfaz-vlc.sh current artist-track)"
 	if [ "a$LAST_TRACKNAME" != "a$TRACKNAME" ] || [ $NOT_UPDATED_TIMES -gt 10 ]; then
 		echo "Sending track name: $TRACKNAME"

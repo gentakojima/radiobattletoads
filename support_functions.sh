@@ -13,7 +13,7 @@ function logcommand(){
 	COM=$@
 	echo $DATE $@ >> $RBT_LOGDIR/comandos.log
 	case $2 in
-		addfile|addstream|queuefile|queuestream|delfile|delstream|next|kill|run|clear)
+		addfile|addstream|queuefile|queuestream|delfile|delstream|next|kill|run|clear|seekto)
 			 echo $DATE $@ >> $RBT_LOGDIR/acciones.log
 		;;
 		estado-radio)

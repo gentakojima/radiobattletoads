@@ -19,6 +19,8 @@ fi
 
 while true ; do
 
+date
+
 # Clean variables
 unset nombre_programa
 unset nombreprograma_limpio
@@ -45,7 +47,6 @@ else
         echo "[OK]"
 fi
 PROGRAMA_EN_EMISION_DIFERIDO_HORAINICIO=$($RBT_SCRIPTSDIR/interfaz-vlc.sh current url | grep "file://$RBT_DIFERIDOSDIR/" | sed -r 's/file:\/\/'"$(add_slashes $RBT_DIFERIDOSDIR)"'\/.+-([0-9]+).mp3/\1/')
-echo "[OK]"
 
 echo -n "Descargando info del calendario del programa que debería emitirse: "
 PROGRAMA_QUE_DEBERIA_EMITIRSE_INFOCOMPLETA=$($RBT_SCRIPTSDIR/interfaz-calendario.sh ahora)
@@ -66,6 +67,14 @@ if [ ! -z $PROGRAMA_QUE_DEBERIA_EMITIRSE_HORAINICIO ] ; then
 	TIEMPO_DESDE_HORAINICIO=$(($AHORA-$PROGRAMA_QUE_DEBERIA_EMITIRSE_HORAINICIO))
 fi
 nombreprograma_limpio=$(removespecialchars $PROGRAMA_QUE_DEBERIA_EMITIRSE );
+
+if [ -z "$PROGRAMA_QUE_DEBERIA_EMITIRSE" ] ; then
+	echo PROGRAMA_QUE_DEBERIA_EMITIRSE:$PROGRAMA_QUE_DEBERIA_EMITIRSE
+	echo PROGRAMA_QUE_DEBERIA_EMITIRSE_INFOCOMPLETA:$PROGRAMA_QUE_DEBERIA_EMITIRSE_INFOCOMPLETA
+	echo "Oops. El programa que debería emitirse está vacío? Espero un poco..."
+	sleep 40
+	continue
+fi
 
 ACCIONES=()
 
@@ -138,8 +147,13 @@ if ( [ "a$(esta_incluido "$PROGRAMA_EN_EMISION" "$PROGRAMA_QUE_DEBERIA_EMITIRSE"
 			;;
 			"diferido")
 				echo "- [!] Es un diferido. Anhado el mp3 con la hora de inicio y el nombre del programa."
-					ACCIONES=("${ACCIONES[@]}" "diferido")
+					if [ $TIEMPO_DESDE_HORAINICIO -gt 120 ] ; then
+						ACCIONES=("${ACCIONES[@]}" "diferido-seek")
+					else
+						ACCIONES=("${ACCIONES[@]}" "diferido")
+					fi	
 					ACCIONES=("${ACCIONES[@]}" "twitter")
+
 			;;
 			*)
 				echo "- No tiene tipo. Debe ser musica. Compruebo..."
@@ -252,6 +266,23 @@ for p in ${ACCIONES[@]} ; do
                         $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_j.mp3"
                         $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_k.mp3"
                         $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_l.mp3"
+		;;
+		"diferido-seek")
+			nombreprograma_limpio=$(removespecialchars $PROGRAMA_QUE_DEBERIA_EMITIRSE );
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "file://$RBT_DIFERIDOSDIR/$nombreprograma_limpio-$PROGRAMA_QUE_DEBERIA_EMITIRSE_HORAINICIO.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_3a.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_b.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_c.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_d.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_e.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_f.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_g.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_h.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_i.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_j.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_k.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_l.mp3"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh seekto $(($TIEMPO_DESDE_HORAINICIO-20))
 		;;
 		"cambiacunhadirecto")
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh delfile "$RBT_CUNHASDIR/cunha_1a.mp3"
