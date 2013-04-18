@@ -36,29 +36,29 @@ This is the code running the online radio Radio Battletoads
 
 ## TODO
 
-  * Remove wget dependency in favor of curl
-  * Urgent cleanup: calendario.php
-  * General cleanup
+  - Remove wget dependency in favor of curl
+  - Urgent cleanup: calendario.php
+  - General cleanup
 
 ## CHANGELOG
 
-  Here are listed the most important features and bugfixes only.
+Here are listed the most important features and bugfixes only.
 
-  [2013-04-18 @96575da9db] 
-    - Fix: Radio was being cleared all the time randomly until the control.sh
-      daemon was restarted. This has been addressed and fixed now.
-    - Fix: Tweets were not being sended if they exceeded 140 characters.
-  [2013-04-08 @c6e67c3246]
-    - Change: Jingles are now shuffled properly, and all of them will be
-      played before being repeated.
-  [2013-04-05 @17973de3e2]
-    - Change: The radio control script "control.sh" is now a daemon run by
-      the init script, and not a cronjob.
-  [2013-04-04 @9b089b8d48]
-    - Change: The radio server is not queried by the web server anymore. All
-      the communication is done FROM the radio server TO the web server. The
-      radio server now provides all the info needed by the web server at
-      any time. This speeds up calendario.php and simplifies its logic.
+### [2013-04-18 @96575da9db] 
+ - Fix: Radio was being cleared all the time randomly until the control.sh
+   daemon was restarted. This has been addressed and fixed now.
+ - Fix: Tweets were not being sended if they exceeded 140 characters.
+### [2013-04-08 @c6e67c3246]
+ - Change: Jingles are now shuffled properly, and all of them will be
+   played before being repeated.
+### [2013-04-05 @17973de3e2]
+ - Change: The radio control script "control.sh" is now a daemon run by
+   the init script, and not a cronjob.
+### [2013-04-04 @9b089b8d48]
+ - Change: The radio server is not queried by the web server anymore. All
+   the communication is done FROM the radio server TO the web server. The
+   radio server now provides all the info needed by the web server at
+   any time. This speeds up calendario.php and simplifies its logic.
 
 ## ARCHITECTURE
 
