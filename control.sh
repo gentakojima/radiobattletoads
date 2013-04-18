@@ -254,7 +254,7 @@ for p in ${ACCIONES[@]} ; do
 		"diferido")
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh addfile "$RBT_CUNHASDIR/cortinilla_corta.mp3"
 			nombreprograma_limpio=$(removespecialchars $PROGRAMA_QUE_DEBERIA_EMITIRSE );
-			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "file://$RBT_DIFERIDOSDIR/$nombreprograma_limpio-$PROGRAMA_QUE_DEBERIA_EMITIRSE_HORAINICIO.mp3"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh addfile "file://$RBT_DIFERIDOSDIR/$nombreprograma_limpio-$PROGRAMA_QUE_DEBERIA_EMITIRSE_HORAINICIO.mp3"
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_3a.mp3"
                         $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_b.mp3"
                         $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_c.mp3"
@@ -300,7 +300,7 @@ for p in ${ACCIONES[@]} ; do
 				else
 					TWEET="Empieza $PROGRAMA_QUE_DEBERIA_EMITIRSE $PROGRAMA_QUE_DEBERIA_EMITIRSE_EPISODIO ($PROGRAMA_QUE_DEBERIA_EMITIRSE_TIPO) - Escúchalo en http://$WEB_SERVER/"
 				fi
-				ttytter -status="$TWEET"
+				ttytter -status="$TWEET" -autosplit=word
 			fi
 		;;
 	esac
