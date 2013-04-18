@@ -35,6 +35,7 @@ unset PROGRAMA_QUE_DEBERIA_EMITIRSE_INFOCOMPLETA
 unset PROGRAMA_QUE_DEBERIA_EMITIRSE_TIPO
 unset PROGRAMA_QUE_DEBERIA_EMITIRSE_TWITTER
 unset TIEMPO_DESDE_HORAINICIO
+unset ENCONTRADO_EN_PLAYLIST
 echo "Obteniendo información:"
 
 echo -n "Descargando info del VLC del programa actual: "

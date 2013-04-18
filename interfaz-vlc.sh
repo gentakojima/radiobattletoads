@@ -168,8 +168,12 @@ case $COMANDO in
 				fi
 		                LINE=`cat /tmp/vlc_playlist | grep "<leaf" | grep current`
 				URL=$(echo $LINE |sed -r 's/.*uri=\"([^"]+)\".*/\1/')
-				OUTPUT=$($RBT_SCRIPTSDIR/interfaz-calendario.sh nombre "$URL")
-				echo "$OUTPUT"
+				if [ ! -z "$URL" ] ; then
+					OUTPUT=$($RBT_SCRIPTSDIR/interfaz-calendario.sh nombre "$URL")
+					echo "$OUTPUT"
+				else
+					echo "<Nothing>"
+				fi
 			;;
 			artist-track)
 				wget --quiet -O /tmp/vlc_status $URL_STATUS
