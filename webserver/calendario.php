@@ -237,6 +237,7 @@ foreach ( $entries_xml as $entry_xml ) {
                 $nombre_completo_a = explode(':::',$nombre_completo);
                 $emision['programa'] = $nombre_completo_a[0];
                 $emision['episodio'] = $nombre_completo_a[1];
+		$emision['episodio'] = trim(str_replace($nombre_completo_a[0],"",$nombre_completo_a[1]));
                 
                 // Tipo
                 preg_match('/[ ]*#((directo)|(diferido))/',$nombre_completo_original,$matches);
