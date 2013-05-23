@@ -27,7 +27,21 @@ $RBT_SCRIPTSDIR/interfaz-calendario.sh diferidos | while read LINE ; do
 	DESCARGADO="false"
 	if [ "a$URL" != "a" ] && ( [ ! -f "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.url" ] || [ "a$(cat "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.url")" != "a$URL" ] )  ; then
 		echo " - Descargando MP3"
-		wget --tries=10 $URL -O "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3"
+		# Descarga el MP3. Si es una URL de iVoox, comprobar si se ha descargado correctamente
+		# y sino intentar obtener la URL buena y descargarlo de allí. Si no se puede, lanza una
+		# alerta
+		ARCHIVO="$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3"
+		wget --tries=10 "$URL" -O "$ARCHIVO"
+		#echo "$URL" | grep ivoox.com &>/dev/null
+		#if [ $? -eq 0 ] ; then
+		#	file "$ARCHIVO" | grep HTML &>/dev/null
+		#	if [ $? -eq 0 ] ; then
+		#		echo " - Es un podcast de iVoox y lleva a una página web. Intentando arreglarlo..."
+		#		URL_CANAL_IVOOX="$(cat cosa.mp3 | grep "<meta" | grep 'property="og:user"' | sed -r 's/.*"(http:\/\/[^"]*)".*/\1/')
+		#		wget --tries=10 "$URL_CANAL_IVOOX" -O /tmp/rbt_fix_ivoox_canal
+		#		
+		#	fi
+		#fi
 		DESCARGADO="true"
 	else
 		if [ $(($HORAINICIO-$AHORA)) -lt 86400 ] && [ $AHORA -gt $TRESAMHOY ] ; then
@@ -54,6 +68,7 @@ $RBT_SCRIPTSDIR/interfaz-calendario.sh diferidos | while read LINE ; do
 		DURACION=$(mp3info -p %S "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3")
 		echo $URL > "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.url"
 		curl "http://$WEB_SERVER/api/calendario.php?update_diferido=1&key=$WEB_KEY&programa=$(urlencode "$PROGRAMA_STRIPPED")&horainicio=$HORAINICIO&duracion=$DURACION&episodio=$(urlencode "$EMISION")&url=$(urlencode "$URL")"
+		unset DURACION
 	fi
 done
 
