@@ -300,7 +300,7 @@ for p in ${ACCIONES[@]} ; do
 				else
 					TWEET="Empieza $PROGRAMA_QUE_DEBERIA_EMITIRSE $PROGRAMA_QUE_DEBERIA_EMITIRSE_EPISODIO ($PROGRAMA_QUE_DEBERIA_EMITIRSE_TIPO) - Escúchalo en http://$WEB_SERVER/"
 				fi
-				ttytter -status="$TWEET" -autosplit=word
+				ttytter -status="$TWEET" -autosplit=cut
 			fi
 		;;
 	esac
