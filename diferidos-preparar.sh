@@ -32,16 +32,22 @@ $RBT_SCRIPTSDIR/interfaz-calendario.sh diferidos | while read LINE ; do
 		# alerta
 		ARCHIVO="$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3"
 		wget --tries=10 "$URL" -O "$ARCHIVO"
-		#echo "$URL" | grep ivoox.com &>/dev/null
-		#if [ $? -eq 0 ] ; then
-		#	file "$ARCHIVO" | grep HTML &>/dev/null
-		#	if [ $? -eq 0 ] ; then
-		#		echo " - Es un podcast de iVoox y lleva a una página web. Intentando arreglarlo..."
-		#		URL_CANAL_IVOOX="$(cat cosa.mp3 | grep "<meta" | grep 'property="og:user"' | sed -r 's/.*"(http:\/\/[^"]*)".*/\1/')
-		#		wget --tries=10 "$URL_CANAL_IVOOX" -O /tmp/rbt_fix_ivoox_canal
-		#		
-		#	fi
-		#fi
+		echo "$URL" | grep ivoox.com &>/dev/null
+		if [ $? -eq 0 ] ; then
+			file "$ARCHIVO" | grep HTML &>/dev/null
+			if [ $? -eq 0 ] ; then
+				echo " - Es un podcast de iVoox y lleva a una página web. Intentando arreglarlo..."
+				for p in md me mf mg mh mi mj mk ; do
+					URL_FIXED=$(echo "$URL" | sed -r 's/[a-z]*(_[0-9]+_[0-9]+\.mp3)/'$p'\1/')
+					wget --tries=10 "$URL_FIXED" -O "$ARCHIVO"
+					file "$ARCHIVO" | grep HTML &>/dev/null
+					if [ $? -ne 0 ] ; then
+						echo " - Arreglado! :D"
+						break
+					fi
+				done
+			fi
+		fi
 		DESCARGADO="true"
 	else
 		if [ $(($HORAINICIO-$AHORA)) -lt 86400 ] && [ $AHORA -gt $TRESAMHOY ] ; then
