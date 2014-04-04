@@ -60,6 +60,7 @@ if [ "$REINICIAR" == "FALSE" ] ; then
 fi
 
 if [ "$REINICIAR" == "TRUE" ] ; then
+	echo "Reiniciado en $(date)" >> /tmp/reiniciada-radio
 	$RBT_SCRIPTSDIR/interfaz-vlc.sh restart
 	$RBT_SCRIPTSDIR/control.sh
 else
