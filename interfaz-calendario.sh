@@ -101,7 +101,7 @@ case $COMANDO in
 		if [ $? -ne 0 ] ; then
 			exit 1
 		fi
-		cat /tmp/programas | sed ':a;N;$!ba;s/\n/ /g' | sed 's/<emision/\n<emision/g' | grep '<emision>' | grep "<nombre>$ARGUMENTO</nombre>" | grep -e "\<$COMANDO\>[^<]" | sed -r "s/^.*<$COMANDO>(.*)<\/$COMANDO>.*$/\1/"
+		cat /tmp/programas | sed ':a;N;$!ba;s/\n/ /g' | sed 's/<emision/\n<emision/g' | grep '<emision>' | grep "<nombre>$ARGUMENTO</nombre>" | grep "<$COMANDO>" | sed -r "s/^.*<$COMANDO>(.*)<\/$COMANDO>.*$/\1/"
 	;;
 	list)
                 wget  --timeout 20 --tries=2 --quiet -O /tmp/programas $URL_PROGRAMAS
