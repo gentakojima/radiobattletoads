@@ -109,12 +109,7 @@ case $COMANDO in
 			exit 1
 		fi
 		awk '/<emision>/,/<\/emision>/' /tmp/programas > /tmp/programas_sindisabled
-                cat /tmp/programas_sindisabled | while read LINE ; do
-                	echo $LINE | grep "<nombre>" > /dev/null
-                        if [ $? -eq 0 ] ; then 
-				echo $LINE |sed -r 's/<nombre>(.+)<\/nombre>/\1/'
-			fi
-		done
+		cat /tmp/programas_sindisabled | grep "<nombre>" | sed -r 's/^.*<nombre>(.*)<\/nombre>/\1/'
 	;;
 	diferidos)
 		wget --timeout 20 --tries=2  --quiet -O /tmp/calendario $URL_CALENDARIO
