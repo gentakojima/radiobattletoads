@@ -130,7 +130,8 @@ case $COMANDO in
 		if [ $? -ne 0 ] ; then
 			exit 1
 		fi
-                cat /tmp/programas | while read LINE ; do
+		awk '/<emision>/,/<\/emision>/' /tmp/programas > /tmp/programas_sindisabled
+                cat /tmp/programas_sindisabled | while read LINE ; do
                 	echo $LINE | grep "<nombre>" > /dev/null
                         if [ $? -eq 0 ] ; then 
 				echo $LINE |sed -r 's/<nombre>(.+)<\/nombre>/\1/'
