@@ -100,33 +100,7 @@ case $COMANDO in
 		if [ $? -ne 0 ] ; then
 			exit 1
 		fi
-                cat /tmp/programas | while read LINE ; do
-                        if [ "a$MODO" == "acomparar" ] ; then MODO="" ; fi
-                        echo $LINE | grep "<emision>" > /dev/null && MODO="leer"
-                        echo $LINE | grep "</emision>" > /dev/null && MODO="comparar"
-                        case $MODO in
-                                leer)
-                                        LINEA="";
-                                        echo $LINE | grep "<$COMANDO>" > /dev/null
-                                        if [ $? -eq 0 ] ; then LINEA="$COMANDO"; fi
-                                        echo $LINE | grep "<nombre>" > /dev/null
-                                        if [ $? -eq 0 ] ; then LINEA="nombre" ; fi
-                                        case $LINEA in
-                                                $COMANDO)
-                                                        CURRENT_OUTPUT=$(echo $LINE |sed -r 's/<'$COMANDO'>(.+)<\/'$COMANDO'>/\1/')
-                                                ;;
-                                                nombre)
-                                                        CURRENT_NOMBRE=$(echo $LINE |sed -r 's/<nombre>(.+)<\/nombre>/\1/')
-                                                ;;
-                                        esac
-                                ;;
-                                comparar)
-                                        if [ "a$CURRENT_NOMBRE" == "a$ARGUMENTO" ] ; then
-                                                echo $CURRENT_OUTPUT
-                                        fi
-                                ;;
-                        esac
-                done
+		cat /tmp/programas | sed ':a;N;$!ba;s/\n/ /g' | sed 's/<emision/\n<emision/g' | grep '<emision>' | grep "<nombre>$ARGUMENTO</nombre>" | grep -e "\<$COMANDO\>[^<]" | sed -r "s/^.*<$COMANDO>(.*)<\/$COMANDO>.*$/\1/"
 	;;
 	list)
                 wget  --timeout 20 --tries=2 --quiet -O /tmp/programas $URL_PROGRAMAS
