@@ -41,8 +41,8 @@ echo "Obteniendo información:"
 echo -n "Descargando info del VLC del programa actual: "
 PROGRAMA_EN_EMISION=$($RBT_SCRIPTSDIR/interfaz-vlc.sh current programa)
 if [ $? -eq 1 ] ; then
-        echo "[FAIL] Retrying after 20 seconds..."
-        sleep 20
+        echo "[FAIL] Retrying after 30 seconds..."
+        sleep 30
         continue
 else
         echo "[OK]"
@@ -52,8 +52,8 @@ PROGRAMA_EN_EMISION_DIFERIDO_HORAINICIO=$($RBT_SCRIPTSDIR/interfaz-vlc.sh curren
 echo -n "Descargando info del calendario del programa que debería emitirse: "
 PROGRAMA_QUE_DEBERIA_EMITIRSE_INFOCOMPLETA=$($RBT_SCRIPTSDIR/interfaz-calendario.sh ahora)
 if [ $? -eq 1 ] ; then
-	echo "[FAIL] Retrying after 20 seconds..."
-	sleep 20
+	echo "[FAIL] Retrying after 30 seconds..."
+	sleep 30
 	continue
 else
 	echo "[OK]"
@@ -311,5 +311,5 @@ for p in ${ACCIONES[@]} ; do
 	esac
 done
 
-sleep 5
+sleep 12
 done # end while true
