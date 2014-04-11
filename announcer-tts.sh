@@ -12,6 +12,7 @@ PROGRAMA_COMPLETO="$(echo $PROGRAMA_COMPLETO | sed -r "s/0*([0-9]+)x0*([0-9]+)/t
 PROGRAMA_COMPLETO="$(echo $PROGRAMA_COMPLETO | sed -r "s/#([0-9]+)/n'umero \1./")"					# Textos del tipo #213
 PROGRAMA_COMPLETO="$(echo $PROGRAMA_COMPLETO | sed -r 's/&#[0-9a-zA-Z]+\;/. /g')"					# Borrar html entities
 PROGRAMA_COMPLETO="$(echo $PROGRAMA_COMPLETO | sed -r 's/ & / y /g')"							# Ampersand
+PROGRAMA_COMPLETO="$(echo $PROGRAMA_COMPLETO | sed -r 's/_/ /g')"							# Barras bajas
 PROGRAMA_COMPLETO="$(echo $PROGRAMA_COMPLETO | sed 's/ - /. /g' | sed 's/(/. /g' | sed 's/)/. /g' | sed 's/ \././g')"	# Signos de puntuacion
 # Diccionario
 while read line ; do
