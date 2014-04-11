@@ -55,7 +55,7 @@ if($opciones["update_diferido"]==true){
     if($_GET["programa"]!="" && $_GET["horainicio"]!=""){
         if(!is_dir("cache/info")) mkdir("cache/info");
         if($_GET["duracion"]!="") file_put_contents("cache/info/{$_GET["programa"]}-{$_GET["horainicio"]}.duracion",$_GET["duracion"]);
-        if($_GET["episodio"]!="") file_put_contents("cache/info/{$_GET["programa"]}-{$_GET["horainicio"]}.episodio",$_GET["episodio"]);
+        if($_GET["episodio"]!="") file_put_contents("cache/info/{$_GET["programa"]}-{$_GET["horainicio"]}.episodio",htmlentities($_GET["episodio"]));
         if($_GET["url"]!="") file_put_contents("cache/info/{$_GET["programa"]}-{$_GET["horainicio"]}.url",$_GET["url"]);
     }
     else{
