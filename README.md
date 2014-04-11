@@ -44,6 +44,10 @@ This is the code running the online radio Radio Battletoads
 
 Here are listed the most important features and bugfixes only.
 
+### [2014-04-11]
+ - Change: Use TTS to announce new programs. Now requires festival.
+ - Improvement: Faster scripts.
+
 ### [2013-04-18 @96575da9db] 
  - Fix: Radio was being cleared all the time randomly until the control.sh
    daemon was restarted. This has been addressed and fixed now.
@@ -96,6 +100,9 @@ The STREAMING SERVER needs:
  - libogg
  - libvorbis
  - GNU Screen
+ - festival
+ - sox
+ - iconv
 
 
 ## INSTALLATION
@@ -124,6 +131,10 @@ time. Check that Icecast is being started on the system startup.
 Install VLC. No further steps required for VLC to work.
 
 Install GNU Screen.
+
+Install festival for TTS. Also, install the voice Pedro from the Junta de 
+Andalucia repositories: http://forja.guadalinex.org/frs/?group_id=21
+Make sure to also install sox and iconv for this to work.
 
 Install ttytter and setup an account. The radio user should be able to tweet
 by issuing the command `ttytter -status='Something else'`.

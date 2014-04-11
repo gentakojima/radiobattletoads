@@ -100,12 +100,13 @@ if ( [ "a$(esta_incluido "$PROGRAMA_EN_EMISION" "$PROGRAMA_QUE_DEBERIA_EMITIRSE"
 ( [ "a$PROGRAMA_QUE_DEBERIA_EMITIRSE_TIPO" == "adiferido" ] && [ "a$PROGRAMA_EN_EMISION" != "a$nombreprograma_limpio" ] ) || 
 ( [ "a$PROGRAMA_QUE_DEBERIA_EMITIRSE" == "a$nombreprograma_limpio" ] && [ "a$PROGRAMA_QUE_DEBERIA_EMITIRSE_HORAINICIO" != "a$PROGRAMA_EN_EMISION_DIFERIDO_HORAINICIO" ] && [ ! -z "$PROGRAMA_EN_EMISION_DIFERIDO_HORAINICIO" ] ) ; then
 	echo "- No se emite el programa que deberia. Debo hacer algo? Rapido! A la batcueva!"
+	vacia_please="false"
 	if [ "a$PROGRAMA_EN_EMISION" == "a" ] ; then
 		echo "- El programa actual es NINGUNO? Pero esto que es! Vuelvo a preguntar por si acaso."
 		PROGRAMA_EN_EMISION=$($RBT_SCRIPTSDIR/interfaz-vlc.sh current programa)
 		if [ "a$PROGRAMA_EN_EMISION" == "a" ] ; then
 			echo "- [!] Confirmado. Vacio todo entonces."
-	                ACCIONES=("${ACCIONES[@]}" "vaciar")
+	                vacia_please="true"
 		else
 			echo "- Falsa alarma."
 			if [ "a$BREAK_THE_RECURSION" == "" ] ; then
@@ -130,16 +131,20 @@ if ( [ "a$(esta_incluido "$PROGRAMA_EN_EMISION" "$PROGRAMA_QUE_DEBERIA_EMITIRSE"
 			echo "- El programa que deberia emitirse esta en la playlist. Todo esta bien."
 		else
 			echo "- [!] El programa que deberia emitirse no esta en la playlist. Vacio todo."
-			ACCIONES=("${ACCIONES[@]}" "vaciar")
+			vacia_please="true"
 		fi
 	else
 		echo "- [!] Vacio todo."
-		ACCIONES=("${ACCIONES[@]}" "vaciar")
+		vacia_please="true"
 	fi
 	if [ "a" == "a$ENCONTRADO_EN_PLAYLIST" ] || [ "$ENCONTRADO_EN_PLAYLIST" == "false" ] ; then
 		case $PROGRAMA_QUE_DEBERIA_EMITIRSE_TIPO in
 			"directo")
 				echo "- [!] Es un directo. Anhado el directo del programa que toca."
+				ACCIONES=("${ACCIONES[@]}" "generacortinilla")
+				if [ "a$vacia_please" == "atrue" ] ; then
+					ACCIONES=("${ACCIONES[@]}" "vaciar")
+				fi
 	                        ACCIONES=("${ACCIONES[@]}" "directo")
 				if [ "a$USE_TWITTER" == "atrue" ] || [ "a$USE_TWITTER" == "aTRUE" ] ; then
 					echo "- [!] Twitter habilitado. Enviando twit."
@@ -149,8 +154,16 @@ if ( [ "a$(esta_incluido "$PROGRAMA_EN_EMISION" "$PROGRAMA_QUE_DEBERIA_EMITIRSE"
 			"diferido")
 				echo "- [!] Es un diferido. Anhado el mp3 con la hora de inicio y el nombre del programa."
 					if [ $TIEMPO_DESDE_HORAINICIO -gt 120 ] ; then
+						ACCIONES=("${ACCIONES[@]}" "generacortinilla")
+						if [ "a$vacia_please" == "atrue" ] ; then
+							ACCIONES=("${ACCIONES[@]}" "vaciar")
+						fi
 						ACCIONES=("${ACCIONES[@]}" "diferido-seek")
 					else
+						ACCIONES=("${ACCIONES[@]}" "generacortinilla")
+						if [ "a$vacia_please" == "atrue" ] ; then
+							ACCIONES=("${ACCIONES[@]}" "vaciar")
+						fi
 						ACCIONES=("${ACCIONES[@]}" "diferido")
 					fi	
 					ACCIONES=("${ACCIONES[@]}" "twitter")
@@ -160,6 +173,9 @@ if ( [ "a$(esta_incluido "$PROGRAMA_EN_EMISION" "$PROGRAMA_QUE_DEBERIA_EMITIRSE"
 				echo "- No tiene tipo. Debe ser musica. Compruebo..."
 				if [ "a$PROGRAMA_QUE_DEBERIA_EMITIRSE" == "aMúsica Ininterrumpida" ] ; then
 					echo "- [!] Exacto, es musica. Pues anhado la musica."
+					if [ "a$vacia_please" == "atrue" ] ; then
+						ACCIONES=("${ACCIONES[@]}" "vaciar")
+					fi
 					ACCIONES=("${ACCIONES[@]}" "musica")
 				else
 					echo "- No es musica. Pues estamos bien. No se que hacer. Adios!"
@@ -178,12 +194,10 @@ else
 				# Solo hacer esta comprobacion cada 3 minutos, que es muy costosa.
 				if [ $(($(expr $(date +%M) + 0)%3)) -eq 2 ] ; then
 					PLAYLIST=$($RBT_SCRIPTSDIR/interfaz-vlc.sh list)
-					echo $PLAYLIST | grep /cunhas/cunha_1a.mp3 > /dev/null
+					echo $PLAYLIST | grep /cunhas/cunha1a.wav > /dev/null
 					if [ $? -eq 0 ] ; then
-						echo "- [!] Aun tiene la cunha de que empieza el directo. Debo poner la de fin!"
-						ACCIONES=("${ACCIONES[@]}" "cambiacunhadirecto")
-					else
-						echo "- Tiene la cunha correcta. No hago nada."
+						echo "- [!] Generando la cunha de fin..."
+						ACCIONES=("${ACCIONES[@]}" "generacunhafin")
 					fi
 				else
 					echo "- No compruebo si tiene la cunha correcta, lo hago luego."
@@ -222,73 +236,102 @@ for p in ${ACCIONES[@]} ; do
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh clear
 		;;
 		"directo")
-			$RBT_SCRIPTSDIR/interfaz-vlc.sh addfile "$RBT_CUNHASDIR/cortinilla_corta.mp3"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh addfile "$RBT_CUNHASDIR/cortinilla_generada.wav"
 			if [ -z "$URL_STREAM" ] ; then 
 				URL_STREAM=$($RBT_SCRIPTSDIR/interfaz-calendario.sh stream "$PROGRAMA_QUE_DEBERIA_EMITIRSE")
 			fi
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
-			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_1a.mp3"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhaa.wav"
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
-			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_b.mp3"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhab.mp3"
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_c.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhac.mp3"
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_d.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhad.mp3"
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_e.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhae.mp3"
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_f.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhaf.mp3"
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_g.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhag.mp3"
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_h.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhah.mp3"
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_i.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhai.mp3"
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_j.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhaj.mp3"
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_k.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhak.mp3"
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_l.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhal.mp3"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunham.wav"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhan.mp3"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$URL_STREAM"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhao.mp3"
 		;;
 		"diferido")
-			$RBT_SCRIPTSDIR/interfaz-vlc.sh addfile "$RBT_CUNHASDIR/cortinilla_corta.mp3"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh addfile "$RBT_CUNHASDIR/cortinilla_generada.wav"
 			nombreprograma_limpio=$(removespecialchars $PROGRAMA_QUE_DEBERIA_EMITIRSE );
-			$RBT_SCRIPTSDIR/interfaz-vlc.sh addfile "file://$RBT_DIFERIDOSDIR/$nombreprograma_limpio-$PROGRAMA_QUE_DEBERIA_EMITIRSE_HORAINICIO.mp3"
-			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_3a.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_b.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_c.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_d.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_e.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_f.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_g.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_h.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_i.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_j.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_k.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_l.mp3"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "file://$RBT_DIFERIDOSDIR/$nombreprograma_limpio-$PROGRAMA_QUE_DEBERIA_EMITIRSE_HORAINICIO.mp3"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhaa.wav"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhab.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhac.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhad.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhae.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhaf.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhag.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhah.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhai.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhaj.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhak.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhal.mp3"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunham.wav"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhan.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhao.mp3"
 		;;
 		"diferido-seek")
-			$RBT_SCRIPTSDIR/interfaz-vlc.sh addfile "$RBT_CUNHASDIR/cortinilla_corta.mp3"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh addfile "$RBT_CUNHASDIR/cortinilla_generada.wav"
 			nombreprograma_limpio=$(removespecialchars $PROGRAMA_QUE_DEBERIA_EMITIRSE );
                         $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "file://$RBT_DIFERIDOSDIR/$nombreprograma_limpio-$PROGRAMA_QUE_DEBERIA_EMITIRSE_HORAINICIO.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_3a.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_b.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_c.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_d.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_e.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_f.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_g.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_h.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_i.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_j.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_k.mp3"
-                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_l.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhaa.wav"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhab.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhac.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhad.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhae.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhaf.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhag.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhah.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhai.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhaj.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhak.mp3"
+                        $RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhal.mp3"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunham.wav"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhan.mp3"
+			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunhao.mp3"
+			sleep 10
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh seekto $(($TIEMPO_DESDE_HORAINICIO-20))
 		;;
-		"cambiacunhadirecto")
-			$RBT_SCRIPTSDIR/interfaz-vlc.sh delfile "$RBT_CUNHASDIR/cunha_1a.mp3"
-			$RBT_SCRIPTSDIR/interfaz-vlc.sh queuefile "$RBT_CUNHASDIR/cunha_2a.mp3"
+		"generacortinilla")
+			$RBT_SCRIPTSDIR/announcer-tts.sh "$RBT_CUNHASDIR/announcer_base.wav" "$RBT_CUNHASDIR/cortinilla_generada.wav" "Empieza: $PROGRAMA_QUE_DEBERIA_EMITIRSE. $PROGRAMA_QUE_DEBERIA_EMITIRSE_EPISODIO"
+			if [ "a$PROGRAMA_QUE_DEBERIA_EMITIRSE_TIPO" == "adiferido" ] || [ "a$PROGRAMA_QUE_DEBERIA_EMITIRSE_TIPO" == "anuevo" ] || [ "a$PROGRAMA_QUE_DEBERIA_EMITIRSE_TIPO" == "areposicion" ]  ; then
+				$RBT_SCRIPTSDIR/announcer-tts.sh "$RBT_CUNHASDIR/cunhaa_base.wav" "$RBT_CUNHASDIR/cunhaa.wav" "La emisión en diferido de $PROGRAMA_QUE_DEBERIA_EMITIRSE ha terminado. En breves momentos continuará la emisión."
+				$RBT_SCRIPTSDIR/announcer-tts.sh "$RBT_CUNHASDIR/cunham_base.wav" "$RBT_CUNHASDIR/cunham.wav" "Consulta la programación en radiobattletoads punto comm"
+			else
+				if [ ! -z "$PROGRAMA_QUE_DEBERIA_EMITIRSE_TWITTER" ] ; then
+					$RBT_SCRIPTSDIR/announcer-tts.sh "$RBT_CUNHASDIR/cunhaa_base.wav" "$RBT_CUNHASDIR/cunhaa.wav" "La emisión de $PROGRAMA_QUE_DEBERIA_EMITIRSE es en directo, pero todavía no emiten señal. Consulta el twitter del programa en arroba $PROGRAMA_QUE_DEBERIA_EMITIRSE_TWITTER."
+				else
+					$RBT_SCRIPTSDIR/announcer-tts.sh "$RBT_CUNHASDIR/cunhaa_base.wav" "$RBT_CUNHASDIR/cunhaa.wav" "La emisión de $PROGRAMA_QUE_DEBERIA_EMITIRSE es en directo, pero todavía no emiten señal. Seguramente empezará en breves momentos."
+				fi
+				$RBT_SCRIPTSDIR/announcer-tts.sh "$RBT_CUNHASDIR/cunham_base.wav" "$RBT_CUNHASDIR/cunham.wav" "Consulta la programación en radiobattletoads punto comm"
+			fi
+		;;
+		"generacortinillafin")
+			if [ ! -f /tmp/generadacortinillafin ] || [ "a$(cat /tmp/generadacortinillafin 2>/dev/null)" != "a$PROGRAMA_QUE_DEBERIA_EMITIRSE" ] ; then
+				echo "$PROGRAMA_QUE_DEBERIA_EMITIRSE" > /tmp/generadacortinillafin
+				$RBT_SCRIPTSDIR/announcer-tts.sh "$RBT_CUNHASDIR/cunhaa_base.wav" "$RBT_CUNHASDIR/cunhaa.wav" "La emisión en directo de $PROGRAMA_QUE_DEBERIA_EMITIRSE se ha cortado. Es probable que ya haya terminado."
+			fi
 		;;
 		"musica")
 			$RBT_SCRIPTSDIR/interfaz-vlc.sh addfile "file://$RBT_MUSICADIR/playlist.m3u"
