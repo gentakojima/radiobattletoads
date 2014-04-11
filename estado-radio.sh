@@ -31,8 +31,8 @@ fi
 
 echo -ne "Comprobando Stream... "
 timeout 15 wget -t 1 -T 8 http://$ICECAST2_SERVER:$ICECAST2_PORT/$ICECAST2_MOUNT -O $OUTPUTFILE -o $RBTLOGFILE
-grep "timed out" /tmp/comprobacion_stream_log
-if [ $? -eq 0 ] ; then
+grep "timed out" $RBTLOGFILE
+if [ $? -eq 0 ] || [ ! -f $RBTLOGFILE ] ; then
 	logcommand $0 estado-radio "Detectado timeout por primera vez. Volviendo a probar."
 	timeout 15 wget -t 1 -T 13 http://$ICECAST2_SERVER:$ICECAST2_PORT/$ICECAST2_MOUNT -O $OUTPUTFILE.2 -o $RBTLOGFILE.2
 	grep "timed out" $RBTLOGFILE.2
