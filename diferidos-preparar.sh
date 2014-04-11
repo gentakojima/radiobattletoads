@@ -79,9 +79,14 @@ $RBT_SCRIPTSDIR/interfaz-calendario.sh diferidos | while read LINE ; do
 done
 
 # Borrar cosas viejas
-#find $RBT_DIFERIDOSDIR/ -iname '*.mp3' | while read p ; do
-#	echo "TODO"
-#done
+ONEWEEKAGO=$(date +%s -d "1 week ago")
+find $RBT_DIFERIDOSDIR/ -maxdepth 1 -iname '*.mp3' -o -iname '*.url' | while read p ; do
+	FILE_TIMESTAMP=$(echo "$p" | sed -r 's/^.*-([0-9]+)\.((url)|(mp3))/\1/')
+	if [ $FILE_TIMESTAMP -lt $ONEWEEKAGO ] ; then
+		echo "Removing $p... ($FILE_TIMESTAMP < $ONEWEEKAGO)"
+		rm -f "$p"
+	fi
+done
 
 # Convertir los audios que haga falta conservando el tag titulo
 find $RBT_DIFERIDOSDIR/ -iname '*.mp3' | while read p ; do 
