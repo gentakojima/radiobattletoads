@@ -264,7 +264,7 @@ foreach ( $entries_xml as $entry_xml ) {
                         $emision['episodio'] = '(episodio más reciente)';
                         $episodiofile='cache/info/'."{$emision['programa_saneado']}-{$emision['horainicio']}".'.episodio';
                         if(file_exists($episodiofile)){
-                                $emision['episodio'] = trim(file_get_contents($episodiofile));
+                                $emision['episodio'] = iconv("UTF-8","UTF-8//IGNORE",trim(file_get_contents($episodiofile)));
                         }
                 }
                 
