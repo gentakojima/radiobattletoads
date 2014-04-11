@@ -50,7 +50,7 @@ $RBT_SCRIPTSDIR/interfaz-calendario.sh diferidos | while read LINE ; do
 		fi
 		DESCARGADO="true"
 	else
-		if [ $(($HORAINICIO-$AHORA)) -lt 86400 ] && [ $AHORA -gt $TRESAMHOY ] ; then
+		if [ $(($HORAINICIO-$AHORA)) -lt 86400 ] && [ $AHORA -gt $TRESAMHOY ] || [ "a$(cat "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.url" 2>/dev/null)" == "a$URL" ] ; then
 			echo " - Preparando podcast"
 			ARCHIVO=$(ls -1 "$HOME/podcasts/RBT/$PROGRAMA/"*)
 			if [ ! -f "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3" ] ; then
