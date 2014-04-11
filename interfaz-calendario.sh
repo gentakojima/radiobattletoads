@@ -30,6 +30,7 @@ if [ -z "$COMANDO" ] ; then
 	echo " twitter NOMBRE    Busca el twitter de un programa por su nombre"
 	echo " chat NOMBRE    Busca el chat de un programa por su nombre"
 	echo " web NOMBRE    Busca la web de un programa por su nombre"
+	echo " icono NOMBRE    Busca el icono de un programa por su nombre"
 	echo " list	Lista los programas disponibles"
 	echo " diferidos	Lista las URL de los podcasts en diferido que se van a emitir"
 	echo " ahora	Muestra la info del programa que se debe estar emitiendo actualmente"
@@ -94,7 +95,7 @@ case $COMANDO in
 			done
 		fi
 		;;
-	stream|podcast|twitter|descripcion|web|chat)
+	stream|podcast|twitter|descripcion|web|chat|icono)
 		OUTPUT=""
                 MODO=""
                 wget  --timeout 20 --tries=2 --quiet -O /tmp/programas $URL_PROGRAMAS
