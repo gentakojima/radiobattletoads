@@ -40,7 +40,7 @@ $RBT_SCRIPTSDIR/interfaz-calendario.sh diferidos | while read LINE ; do
 				for p in md me mf mg mh mi mj mk ; do
 					URL_FIXED=$(echo "$URL" | sed -r 's/[a-z]*(_[0-9]+_[0-9]+\.mp3)/'$p'\1/')
 					wget --tries=10 "$URL_FIXED" -O "$ARCHIVO"
-					file "$ARCHIVO" | grep HTML &>/dev/null
+					file "$ARCHIVO" | grep -E 'short|HTML' &>/dev/null
 					if [ $? -ne 0 ] ; then
 						echo " - Arreglado! :D"
 						break
