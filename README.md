@@ -207,9 +207,6 @@ Put at least one 44100Hz, stereo mp3 file at `~/music/`.
 Generate the first music playlist by issuing manually `~/scripts/
 musica-generarplaylist.sh`.
 
-Download the first podcasts by issuing manually `~/scripts/
-podcasts-generar_serverlist.sh`, and then `~/scripts/podcasts-descargar.sh`.
-
 Prepare the podcasts and download the mp3 files so they can be streamed by 
 issuing manually `~/scripts/diferidos-preparar.sh`.
 
