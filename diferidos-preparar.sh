@@ -19,6 +19,7 @@ AHORA=$(date +%s)
 # Extraer metadatos y enviárselos al servidor web
 
 $RBT_SCRIPTSDIR/interfaz-calendario.sh diferidos | while read LINE ; do
+	CHAPTER_TITLE_FORCE=""
 	echo "Preparando $LINE"
 	HORAINICIO=$(echo $LINE | sed -r 's/^.+:::(.+):::.*$/\1/')
 	PROGRAMA=$(echo $LINE | sed -r 's/^(.+):::.+:::.*$/\1/')
@@ -52,10 +53,20 @@ $RBT_SCRIPTSDIR/interfaz-calendario.sh diferidos | while read LINE ; do
 	else
 		if [ $(($HORAINICIO-$AHORA)) -lt 86400 ] && [ $AHORA -gt $TRESAMHOY ] || [ "a$(cat "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.url" 2>/dev/null)" == "a$URL" ] ; then
 			echo " - Preparando podcast"
-			ARCHIVO=$(ls -1 "$HOME/podcasts/RBT/$PROGRAMA/"*)
 			if [ ! -f "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3" ] ; then
-				cp "$ARCHIVO" "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3"
-				DESCARGADO="true"
+				PODCAST_URL="$($RBT_SCRIPTSDIR/interfaz-calendario.sh podcast "$PROGRAMA")"
+				if [ -z "$PODCAST_URL" ] ; then
+					echo " - No tiene podcast! No puedo descargar nada!"
+				else
+					wget "$PODCAST_URL" -O /tmp/podcastsdescargar &>/dev/null
+					cat /tmp/podcastsdescargar | sed ':a;N;$!ba;s/\n/ /g' | sed 's/<item>/\n<item>/g' | grep '^<item>' | grep .mp3 > /tmp/podcastsdescargar_saned
+					CHAPTER_MP3S="$(cat /tmp/podcastsdescargar_saned | sed -r 's/^.*(https?:\/\/([^.][^m]?[^p]?[^3]?)*\.mp3).*$/\1/')"
+					CHAPTER_TITLES="$(cat /tmp/podcastsdescargar_saned | sed -r 's/^.*<title>(<!\[CDATA\[)?(.*)<\/title>.*$/\2/' | sed -r 's/\]\]>$//')"
+					CHAPTER_MP3="$(echo "$CHAPTER_MP3S" | head -1)"
+					CHAPTER_TITLE_FORCE="$(echo "$CHAPTER_TITLES" | head -1 | sed -r "s/^$CHOOSEN_PODCAST(\W|\D)*//i")"
+					wget -O "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3" "$CHAPTER_MP3"
+					DESCARGADO="true"
+				fi
 			else
 				echo " - No haciendo nada porque ya está preparado"
 			fi
@@ -64,12 +75,16 @@ $RBT_SCRIPTSDIR/interfaz-calendario.sh diferidos | while read LINE ; do
 		fi
 	fi
 	if [ "a$DESCARGADO" == "atrue" ] ; then
-		echo " - Escribiendo duración, url y nombre de episodio "
-		#ID3v1
-		EMISION=$(mp3info -p %t "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3" | sed -r "s/[ ]*$PROGRAMA[ ,.:-]*[ ]*//")
-		#ID3v2
-		if [ "a" == "a$EMISION" ] ; then 
-			EMISION=$(exiftool -Title "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3" | sed -E 's/^Title[ ]*: ('"$PROGRAMA"')?[ ,.:-]*(.*)[ ]*$/\2/')
+		echo " - Escribiendo duracion, url y nombre de episodio"
+		if [ ! -z "$CHAPTER_TITLE_FORCE" ] ; then
+			EMISION="$CHAPTER_TITLE_FORCE"
+		else
+			#ID3v1
+			EMISION=$(mp3info -p %t "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3" | sed -r "s/[ ]*$PROGRAMA[ ,.:-]*[ ]*//")
+			#ID3v2
+			if [ "a" == "a$EMISION" ] ; then 
+				EMISION=$(exiftool -Title "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3" | sed -E 's/^Title[ ]*: ('"$PROGRAMA"')?[ ,.:-]*(.*)[ ]*$/\2/')
+			fi
 		fi
 		DURACION=$(mp3info -p %S "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.mp3")
 		echo $URL > "$RBT_DIFERIDOSDIR/$PROGRAMA_STRIPPED-$HORAINICIO.url"

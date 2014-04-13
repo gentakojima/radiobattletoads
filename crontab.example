@@ -12,12 +12,6 @@
 ###############
 10 03 * * * $HOME/scripts/dumps-rotar.sh
 
-######################
-# Descargar podcasts #
-######################
-20 03 * * * $HOME/scripts/podcasts-generar_serverlist.sh
-25 03 * * * $HOME/scripts/podcasts-descargar.sh
-
 #####################
 # Randomizar musica #
 #####################

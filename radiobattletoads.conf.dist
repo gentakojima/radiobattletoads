@@ -58,18 +58,3 @@ KEEPDUMPS_DAYS=12
 JINGLE_PREFIX="rbt_cunha"
 JINGLE_EVERY=3
 
-# Purge podcasts every time.
-# true or TRUE means true, anything else means false
-# This is a workaround to a known problem:
-#  To stream the last episode of a podcast, podget keeps getting
-#  the new episodes, and deletes all but the newest. As this is
-#  done by using the file modification date and som podcasters
-#  don't set the modification dates properly on their files,
-#  sometimes newer episodes are deleted and an old one keeps
-#  streaming all the time because it has a bad modification date.
-#  Setting this to true will make the scripts delete ALL the
-#  podcasts every time, and redownload them again. This means
-#  a lot of data transfer every time, so set this value 
-#  wisely.
-PODCASTS_PURGE="true"
-

@@ -93,7 +93,6 @@ The STREAMING SERVER needs:
  - VLC 2.0
  - Icecast 2.3
  - Ttytter 2.0
- - Podget
  - wget
  - curl
  - lame
@@ -138,9 +137,6 @@ Make sure to also install sox and iconv for this to work.
 
 Install ttytter and setup an account. The radio user should be able to tweet
 by issuing the command `ttytter -status='Something else'`.
-
-Install Podget. Configure the dir_library on the file `.podget/podgetrc` 
-(i.e: dir_library=/home/radiobattletoads/podcasts) on your radio user profile.
 
 Create the `~/scripts` directory and copy every .sh file and the .conf.dist
 file inside it.
