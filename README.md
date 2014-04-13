@@ -28,9 +28,6 @@ This is the code running the online radio Radio Battletoads
   - The generated calendar is cached, so changes to a Googler Calendar won't be
     instantly reflected on the generated calendar (takes up to 3.5 minutes by 
     default for changes to take effect)
-  - Podcasts are downloaded every day just once by default. If a podcast is
-    published between the last night and the scheduled hour, the previous 
-    episode will be aired instead
   - MP3s are downloaded every hour. If a mp3 is scheduled less than an hour
     before the show starts, the show might not be aired
 
@@ -43,6 +40,10 @@ This is the code running the online radio Radio Battletoads
 ## CHANGELOG
 
 Here are listed the most important features and bugfixes only.
+
+### [2014-04-13]
+ - Change: Podget is not a dependency anymore. The radio scripts download
+   the episodes from the podcast RSS when required.
 
 ### [2014-04-11]
  - Change: Use TTS to announce new programs. Now requires festival.
